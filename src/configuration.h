@@ -1,9 +1,12 @@
 #ifndef configuration_h 
 #define configuration_h 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
 #include <limits.h>
+#include <assert.h>
+
 #include <gsl/gsl_sort.h>
 
 typedef struct kinks{
