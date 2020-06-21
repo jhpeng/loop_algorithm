@@ -38,23 +38,19 @@ void kinks_free(kinks* ks){
 }
 
 void kinks_memcpy(kinks* dest, const kinks* src){
-    if(dest->size>=src->size){
-        dest->nkink   = src->nkink;
-        dest->sigma_i = src->sigma_i;
+    assert(dest->size>=src->size);
 
-        for(int i=0;i<src->size;++i){
-            dest->active[i]   = src->active[i];
-            dest->sigma_b[i]  = src->sigma_b[i];
-            dest->sigma_a[i]  = src->sigma_a[i];
-            dest->bond_id[i]  = src->bond_id[i];
-            dest->graph_id[i] = src->graph_id[i];
-            dest->tau[i] = src->tau[i];
-            dest->sort[i] = src->sort[i];
-        }
-    }
-    else{
-        printf("links_memcpy : memory copy fail!\n");
-        exit(-1);
+    dest->nkink   = src->nkink;
+    dest->sigma_i = src->sigma_i;
+
+    for(int i=0;i<src->size;++i){
+        dest->active[i]   = src->active[i];
+        dest->sigma_b[i]  = src->sigma_b[i];
+        dest->sigma_a[i]  = src->sigma_a[i];
+        dest->bond_id[i]  = src->bond_id[i];
+        dest->graph_id[i] = src->graph_id[i];
+        dest->tau[i] = src->tau[i];
+        dest->sort[i] = src->sort[i];
     }
 }
 
@@ -91,13 +87,15 @@ int kinks_sigma_from_tau(const kinks* ks, double tau){
 }
 
 int kinks_insert(kinks* ks, int bond_id, int graph_id, int sigma, double tau){
-    int i, kink_id=0;
+    int i, kink_id=-1;
     for(i=0;i<ks->size;++i){
         if(ks->active[i]==0){
             kink_id = i;
             break;
         }
     }
+
+    assert(kink_id!=-1);
 
     ks->active[kink_id]   = 1;
     ks->sigma_b[kink_id]  = sigma;
@@ -111,15 +109,15 @@ int kinks_insert(kinks* ks, int bond_id, int graph_id, int sigma, double tau){
 }
 
 void kinks_remove(kinks* ks, int kink_id){
-    if(ks->sigma_b[kink_id]==ks->sigma_a[kink_id]){
-        ks->active[kink_id]   = 0;
-        ks->sigma_b[kink_id]  = 0;
-        ks->sigma_a[kink_id]  = 0;
-        ks->bond_id[kink_id]  = -1;
-        ks->graph_id[kink_id] = -1;
-        ks->tau[kink_id] = DBL_MAX;
-        ks->nkink--;
-    }
+    assert(ks->sigma_b[kink_id]==ks->sigma_a[kink_id]);
+
+    ks->active[kink_id]   = 0;
+    ks->sigma_b[kink_id]  = 0;
+    ks->sigma_a[kink_id]  = 0;
+    ks->bond_id[kink_id]  = -1;
+    ks->graph_id[kink_id] = -1;
+    ks->tau[kink_id] = DBL_MAX;
+    ks->nkink--;
 }
 
 void kinks_sort_index_with_tau(kinks* ks){
@@ -132,6 +130,7 @@ void kinks_sort_index_with_tau(kinks* ks){
 int main(int argc, char** argv){
     int size=100;
     kinks* ks = kinks_alloc(size);
+    kinks* ks_cpy = kinks_alloc(size);
     kinks_set_sigma_i(ks,1);
     
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
@@ -159,9 +158,12 @@ int main(int argc, char** argv){
         int graph_id = ks->graph_id[i];
         double tau = ks->tau[i];
         size_t sort = ks->sort[i];
-        printf("%d, %d, %d, %d, %d, %.32e, %zu\n",active,sigma_a,sigma_b,bond_id,graph_id,tau,sort);
+        printf("%d, %d, %d, %d, %d, %.8e, %zu\n",active,sigma_a,sigma_b,bond_id,graph_id,tau,sort);
     }
 
+    kinks_memcpy(ks_cpy,ks);
+
+    kinks_free(ks_cpy);
     kinks_free(ks);
 }
 #endif
