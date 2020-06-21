@@ -1,11 +1,42 @@
 #include "graph.h"
 
-int rule_4spin(int* rule, int s0, int s1, int s2, int s3){
-    s0 = (s0+1)/2;
-    s1 = (s1+1)/2;
-    s2 = (s2+1)/2;
-    s3 = (s3+1)/2;
-    return rule[s0+2*s1+4*s2+8*s3];
+/*============= define 4-spin graph here ==============*/
+//
+//             ^
+//             |       2|        |3
+//             |        |********|
+//             |        |--------|
+//             |        |--------|
+//    temporal |        |********|
+//             |       0|        |1
+//
+//                    -------------->
+//                     spatial
+/*=====================================================*/
+//diagonal graph  
+int GRAPH_LINK_DIAG[4]  = {3,2,1,0};
+int GRAPH_RULE_DIAG[16] = {1,0,0,0,
+                           0,0,1,0,
+                           0,1,0,0,
+                           0,0,0,1};
+
+graph GRAPH_DIAG = {4,GRAPH_LINK_DIAG,GRAPH_RULE_DIAG};
+
+//horizontal graph  
+int GRAPH_LINK_HORI[4]  = {1,0,3,2};
+int GRAPH_RULE_HORI[16] = {0,0,0,0,
+                           0,1,1,0,
+                           0,1,1,0,
+                           0,0,0,0};
+
+graph GRAPH_HORI = {4,GRAPH_LINK_HORI,GRAPH_RULE_HORI};
+
+int rule_4spin(int* rule, int* s){
+    s[0] = (s[0]+1)/2;
+    s[1] = (s[1]+1);
+    s[2] = (s[2]+1);
+    s[3] = (s[3]+1);
+    return rule[s[0]+s[1]+2*s[2]+4*s[3]];
 }
 
 bond* bond_alloc(size_t size, int nspin, int ntype){
@@ -78,6 +109,20 @@ void bond_set_graph_type(bond* bd, int ntype, graph** type, const double* weight
         bd->type[i] = type[i];
         bd->weight[i] = weight[i];
     }
+}
+
+int bond_check_available_id(bond* bd){
+    int graph_id=-1;
+    for(size_t i=0;i<bd->size;++i){
+        if(bd->graphs[i]==-1){
+            graph_id = i;
+            break;
+        }
+    }
+
+    assert(graph_id!=-1);
+
+    return graph_id;
 }
 
 int bond_insert_graph(bond* bd, int type, double tau, int* kink_id){

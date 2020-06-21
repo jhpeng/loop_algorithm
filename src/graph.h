@@ -27,25 +27,10 @@ typedef struct graph{
 //                     spatial
 /*=====================================================*/
 
-int rule_4spin(int* rule, int s0, int s1, int s2, int s3);
+int rule_4spin(int* rule, int* s);
 
-//diagonal graph  
-int GRAPH_LINK_DIAG[4]  = {3,2,1,0};
-int GRAPH_RULE_DIAG[16] = {1,0,0,0,
-                           0,0,1,0,
-                           0,1,0,0,
-                           0,0,0,1};
-
-graph GRAPH_DIAG = {4,GRAPH_LINK_DIAG,GRAPH_RULE_DIAG};
-
-//horizontal graph  
-int GRAPH_LINK_HORI[4]  = {1,0,3,2};
-int GRAPH_RULE_HORI[16] = {0,0,0,0,
-                           0,1,1,0,
-                           0,1,1,0,
-                           0,0,0,0};
-
-graph GRAPH_HORI = {4,GRAPH_LINK_HORI,GRAPH_RULE_HORI};
+extern graph GRAPH_DIAG;
+extern graph GRAPH_HORI;
 
 
 /*=====================================================*/
@@ -85,6 +70,9 @@ void bond_set_graph_type(
                 int ntype, 
                 graph** type, 
                 const double* weight);
+
+int bond_check_available_id(
+                bond* bd);
 
 int bond_insert_graph(
                 bond* bd, 

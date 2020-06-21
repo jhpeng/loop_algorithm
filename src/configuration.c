@@ -86,6 +86,19 @@ int kinks_sigma_from_tau(const kinks* ks, double tau){
     return sigma;
 }
 
+int kinks_check_available_id(kinks* ks){
+    int i, kink_id=-1;
+    for(i=0;i<ks->size;++i){
+        if(ks->active[i]==0){
+            kink_id = i;
+            break;
+        }
+    }
+
+    assert(kink_id!=-1);
+
+    return kink_id;
+}
 int kinks_insert(kinks* ks, int bond_id, int graph_id, int sigma, double tau){
     int i, kink_id=-1;
     for(i=0;i<ks->size;++i){

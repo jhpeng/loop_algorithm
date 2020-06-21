@@ -40,6 +40,9 @@ int kinks_sigma_from_tau(
                 const kinks* ks, 
                 double tau);
 
+int kinks_check_available_id(
+                kinks* ks);
+
 int kinks_insert(
                 kinks* ks, 
                 int bond_id, 
