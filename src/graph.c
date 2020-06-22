@@ -102,7 +102,7 @@ void bond_set_site_id(bond* bd, int nspin, const int* site_id){
     for(int i=0;i<nspin/2;++i) bd->site_id[i] = site_id[i];
 }
 
-void bond_set_graph_type(bond* bd, int ngraph, graph** graphs, const double* weight){
+void bond_set_graph(bond* bd, int ngraph, graph** graphs, const double* weight){
     assert(bd->ngraph==ngraph);
 
     for(int i=0;i<ngraph;++i){
@@ -208,43 +208,3 @@ void bond_remove_graph(bond* bd, int type_id){
     bd->ntype--;
 }
 
-#if 0
-int main(int argc, char** argv){
-    size_t size = 20;
-    int nspin = 4;
-    int ngraph = 2;
-
-    int site_id[2] = {0,1};
-    graph* g[2] = {&GRAPH_DIAG,&GRAPH_HORI};
-    double w[2] = {1.0,2.0};
-
-    //printf("%d\n",rule_4spin(GRAPH_RULE_HORI,-1,1,1,-1));
-    //printf("%d\n",rule_4spin(GRAPH_RULE_HORI,1,-1,1,-1));
-    //printf("%d\n",rule_4spin(GRAPH_RULE_HORI,-1,1,-1,1));
-    //printf("%d\n",rule_4spin(GRAPH_RULE_HORI,1,-1,-1,1));
-
-    bond* bd1 = bond_alloc(size,nspin,ngraph);
-    bond* bd2 = bond_alloc(2048,nspin,ngraph);
-
-    bond_set_site_id(bd1,nspin,site_id);
-    bond_set_graph_type(bd1,ngraph,g,w);
-
-    int kink_id[2] = {3,5};
-    int type_id = bond_insert_graph(bd1,0,3.14,kink_id);
-
-    for(int i=0;i<size;++i){
-        printf("%d %e \n",bd1->graphs[i],bd1->tau[i]);
-    }
-
-    bond_remove_graph(bd1,type_id);
-
-    for(int i=0;i<size;++i){
-        printf("%d %e \n",bd1->graphs[i],bd1->tau[i]);
-    }
-
-    bond_memcpy(bd2,bd1);
-
-    bond_free(bd1);
-    bond_free(bd2);
-}
-#endif
