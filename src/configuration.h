@@ -17,7 +17,7 @@ typedef struct kinks{
     int* sigma_b;
     int* sigma_a;
     int* bond_id;
-    int* graph_id;
+    int* type_id;
     double* tau;
     size_t* sort;
 } kinks;
@@ -61,7 +61,7 @@ int kinks_get_sigma_a(kinks* ks, size_t kink_id);
 
 int kinks_get_bond_id(kinks* ks, size_t kink_id);
 
-int kinks_get_graph_id(kinks* ks, size_t kink_id);
+int kinks_get_type_id(kinks* ks, size_t kink_id);
 
 double kinks_get_tau(kinks* ks, size_t kink_id);
 
@@ -70,7 +70,7 @@ size_t kinks_get_sort(kinks* ks, size_t rank);
 int kinks_insert(
                 kinks* ks, 
                 int bond_id, 
-                int graph_id, 
+                int type_id, 
                 int sigma, 
                 double tau);
 
