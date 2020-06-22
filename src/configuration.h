@@ -43,6 +43,30 @@ int kinks_sigma_from_tau(
 int kinks_check_available_id(
                 kinks* ks);
 
+int kinks_check_no_kink(
+                kinks* ks, 
+                int kink_id);
+
+size_t kinks_get_size(kinks* ks);
+
+size_t kinks_get_nkink(kinks* ks);
+
+int kinks_get_sigma_i(kinks* ks);
+
+int kinks_get_active(kinks* ks, size_t kink_id);
+
+int kinks_get_sigma_b(kinks* ks, size_t kink_id);
+
+int kinks_get_sigma_a(kinks* ks, size_t kink_id);
+
+int kinks_get_bond_id(kinks* ks, size_t kink_id);
+
+int kinks_get_graph_id(kinks* ks, size_t kink_id);
+
+double kinks_get_tau(kinks* ks, size_t kink_id);
+
+size_t kinks_get_sort(kinks* ks, size_t rank);
+
 int kinks_insert(
                 kinks* ks, 
                 int bond_id, 

@@ -99,6 +99,68 @@ int kinks_check_available_id(kinks* ks){
 
     return kink_id;
 }
+
+int kinks_check_no_kink(kinks* ks, int kink_id){
+    assert(ks->active[kink_id]);
+    if(ks->sigma_a[kink_id]==ks->sigma_b[kink_id]) return 1;
+    else return 0;
+}
+
+size_t kinks_get_size(kinks* ks){
+    return ks->size;
+}
+
+size_t kinks_get_nkink(kinks* ks){
+    return ks->nkink;
+}
+
+int kinks_get_sigma_i(kinks* ks){
+    return ks->sigma_i;
+}
+
+int kinks_get_active(kinks* ks, size_t kink_id){
+    assert(kink_id<ks->size);
+
+    return ks->active[kink_id];
+}
+
+int kinks_get_sigma_b(kinks* ks, size_t kink_id){
+    assert(kink_id<ks->size);
+
+    return ks->sigma_b[kink_id];
+}
+
+int kinks_get_sigma_a(kinks* ks, size_t kink_id){
+    assert(kink_id<ks->size);
+
+    return ks->sigma_a[kink_id];
+}
+
+int kinks_get_bond_id(kinks* ks, size_t kink_id){
+    assert(kink_id<ks->size);
+
+    return ks->bond_id[kink_id];
+}
+
+int kinks_get_graph_id(kinks* ks, size_t kink_id){
+    assert(kink_id<ks->size);
+
+    return ks->graph_id[kink_id];
+}
+
+double kinks_get_tau(kinks* ks, size_t kink_id){
+    assert(kink_id<ks->size);
+
+    return ks->tau[kink_id];
+}
+
+size_t kinks_get_sort(kinks* ks, size_t rank){
+    assert(rank<ks->nkink);
+
+    return ks->sort[rank];
+}
+
+
 int kinks_insert(kinks* ks, int bond_id, int graph_id, int sigma, double tau){
     int i, kink_id=-1;
     for(i=0;i<ks->size;++i){
@@ -137,7 +199,7 @@ void kinks_sort_index_with_tau(kinks* ks){
    gsl_sort_index(ks->sort,ks->tau,1,ks->size); 
 }
 
-#if 1
+#if 0
 #include <gsl/gsl_rng.h>
 
 int main(int argc, char** argv){
