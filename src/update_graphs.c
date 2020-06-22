@@ -41,7 +41,7 @@ static void insert_graph_and_kinks(kinks** ks, bond** bd, int bond_id, int graph
         int kink_id[nspin/2];
         for(int i=0;i<nspin/2;++i){
             site_id = bond_get_site_id(bd[bond_id],i);
-            kink_id[i] = kinks_insert(ks[site_id],bond_id,type_id,sigma[i],tau);
+            kink_id[i] = kinks_insert(ks[site_id],bond_id,(nspin/2)*type_id+i,sigma[i],tau);
         }
         type_id = bond_insert_graph(bd[bond_id],graph_id,tau, kink_id);
     }
@@ -76,7 +76,7 @@ static void group_insert_graphs_and_kinks(kinks** ks, bond** bd, int bond_id, in
     int nspin = bond_get_nspin(bd[bond_id]);
     int ngraph = bond_get_ngraph(bd[bond_id]);
     if(ntype+ntau>size){
-        bond* bd_temp = bond_alloc(2*(ntype+ntau),nspin,ngraph);
+        bond* bd_temp = bond_alloc(ntype+ntau,nspin,ngraph);
         bond_memcpy(bd_temp,bd[bond_id]);
         bond_free(bd[bond_id]);
         bd[bond_id] = bd_temp;
@@ -87,7 +87,7 @@ static void group_insert_graphs_and_kinks(kinks** ks, bond** bd, int bond_id, in
         size  = kinks_get_size(ks[site_id]);
         nkink = kinks_get_nkink(ks[site_id]);
         if(nkink+ntau>size){
-            kinks* ks_temp = kinks_alloc(2*(nkink+ntau));
+            kinks* ks_temp = kinks_alloc(nkink+ntau);
             kinks_memcpy(ks_temp,ks[site_id]);
             kinks_free(ks[site_id]);
             ks[site_id] = ks_temp;
