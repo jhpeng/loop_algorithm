@@ -179,6 +179,7 @@ int bond_get_kink_id(bond* bd, int type_id, int site){
 }
 
 int bond_insert_graph(bond* bd, int type, double tau, int* kink_id){
+    assert(type<bd->ngraph);
     int type_id=-1;
     for(size_t i=0;i<bd->size;++i){
         if(bd->types[i]==-1){
@@ -204,7 +205,8 @@ void bond_remove_graph(bond* bd, int type_id){
         
     bd->types[type_id] = -1;
     bd->tau[type_id] = DBL_MAX;
-    bd->kink_id[type_id] = -1;
+    for(int i=0;i<bd->nspin/2;++i)
+        bd->kink_id[bd->nspin/2*type_id+i] = -1;
     bd->ntype--;
 }
 
