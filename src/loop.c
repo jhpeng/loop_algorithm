@@ -27,6 +27,7 @@ void link_realloc(link* lk, size_t max_type_id){
     lk->size = (lk->nbond)*max_type_id*(lk->max_nspin);
 
     lk->index = (int*)realloc(lk->index,(lk->size)*sizeof(int));
+    for(size_t i=0;i<lk->size;++i) lk->index[i]=-1;
 }
 
 void link_free(link* lk){
@@ -103,7 +104,7 @@ void loop_construct_outer_link(link* lk, kinks** ks, bond** bd, size_t nsite, si
     assert(link_check_init(lk));
 
     for(site_id=0;site_id<nsite;++site_id){
-        nkink = ks[site_id]->size;
+        nkink = kinks_get_nkink(ks[site_id]);
         kink_id = kinks_get_sort(ks[site_id],0);
         
         assert(kinks_get_active(ks[site_id],kink_id));
@@ -295,10 +296,10 @@ int main(int argc, char** argv){
     gsl_rng_set(rng,236298);
 
     size_t ns = 10;
-    double beta = 100.0;
+    double beta = 10.0;
     double* taus = (double*)malloc(size*sizeof(double));
 
-    for(int j=0;j<1000;++j){
+    for(int j=0;j<10000;++j){
         remove_all_graphs_with_no_kink(ks,&bd1,1);
         generate_graphs_with_uniform_dist(ks,&bd1,0,beta,&taus,&ns,rng,rule_4spin);
         loop_cluster_update_user_friendly(ks,&bd1,2,1,rng);
