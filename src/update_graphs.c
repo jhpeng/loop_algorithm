@@ -131,7 +131,7 @@ void remove_all_graphs_with_no_kink(kinks** ks, bond** bd, int nbond){
     }
 }
 
-#if 1
+#if 0
 
 int main(int argc, char** argv){
     size_t size = 20;
