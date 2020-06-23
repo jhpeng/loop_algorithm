@@ -58,6 +58,18 @@ void kinks_set_sigma_i(kinks* ks, int sigma_i){
     ks->sigma_i = sigma_i;
 }
 
+void kinks_flip_sigma_b(kinks* ks, int kink_id){
+    assert(ks->active[kink_id]);
+
+    ks->sigma_b[kink_id] *= -1;
+}
+
+void kinks_flip_sigma_a(kinks* ks, int kink_id){
+    assert(ks->active[kink_id]);
+
+    ks->sigma_a[kink_id] *= -1;
+}
+
 int kinks_sigma_from_tau(const kinks* ks, double tau){
     int sigma=0;
     if(ks->nkink==0) sigma = ks->sigma_i;

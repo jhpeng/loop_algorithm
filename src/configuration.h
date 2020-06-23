@@ -36,6 +36,14 @@ void kinks_set_sigma_i(
                 kinks* ks, 
                 int sigma_i);
 
+void kinks_flip_sigma_b(
+                kinks* ks, 
+                int kink_id);
+
+void kinks_flip_sigma_a(
+                kinks* ks, 
+                int kink_id);
+
 int kinks_sigma_from_tau(
                 const kinks* ks, 
                 double tau);
