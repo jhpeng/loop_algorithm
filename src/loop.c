@@ -314,7 +314,7 @@ void loop_cluster_update_user_friendly(kinks** ks, bond** bd, int nsite, int nbo
     assert(loop_cluster_check_periodic(ks,nsite));
 }
 
-#if 1
+#if 0
 
 #include "update_graphs.h"
 
@@ -349,10 +349,10 @@ int main(int argc, char** argv){
 
     for(int j=0;j<100;++j){
         remove_all_graphs_with_no_kink(ks,&bd1,1);
-        sort_all_site_with_tau(ks,2);
         generate_graphs_with_uniform_dist(ks,&bd1,0,beta,&taus,&ns,rng,rule_4spin);
         kinks_print_state(ks[0]);
         kinks_print_state(ks[1]);
+        bond_print_state(bd1);
         sort_all_site_with_tau(ks,2);
         loop_cluster_update_user_friendly(ks,&bd1,2,1,rng);
     }

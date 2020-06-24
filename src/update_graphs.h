@@ -13,18 +13,27 @@
 #include "configuration.h"
 #include "graph.h"
 
-void generate_graphs_with_uniform_dist(
-                kinks** ks,                     //bounch of kinks 
-                bond** bd,                      //bounch of bond
-                int bond_id,                    //choose a bond to generate graphs
-                double beta,                    //inverse temperature of the system
-                double** taus,                  //working space of uniform dist. 
-                size_t* size,                   //size of working space
-                gsl_rng* rng,                   //gsl random number generater
-                int (*rule_nspin)(int*,int*));  //the rule for nspin graph
+typedef struct insertion_plan{
+    size_t size;
+    int max_nspin;
+    size_t ntau;
+    double* taus;
+    int* accept;
+    int* sigma;
+} insertion_plan;
 
 void remove_all_graphs_with_no_kink(
                 kinks** ks,                     //bounch of kinks
                 bond** bd,                      //bounch of bond
+                int nsite,                      //total number of site
                 int nbond);                     //total number of bond
+
+void update_graph_user_friendly(
+                kinks** ks, 
+                bond** bd, 
+                int nsite, 
+                int nbond, 
+                int max_nspin, 
+                double beta, 
+                gsl_rng* rng);
 #endif
