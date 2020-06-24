@@ -21,7 +21,7 @@ LFLAGS	= -L/usr/local/lib
 LIBS	= -lm -lgsl -lgslcblas
 
 # define the C object files
-OBJS	= configuration.o graph.o update_graphs.o loop.o
+OBJS	= configuration.o graph.o update_graphs.o loop.o main.o
 
 #define the directory for object
 OBJSDIR = object
