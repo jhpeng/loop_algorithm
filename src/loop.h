@@ -61,6 +61,15 @@ void loop_cluster_flip(
                 link* outer_lk, 
                 int nbond);
 
+void loop_cluster_sigma_i(
+                kinks** ks, 
+                int nsite, 
+                gsl_rng* rng);
+
+int loop_cluster_check_periodic(
+                kinks** ks, 
+                int nsite);
+
 void loop_cluster_update_user_friendly(
                 kinks** ks, 
                 bond** bd, 

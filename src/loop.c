@@ -105,20 +105,9 @@ void loop_construct_outer_link(link* lk, kinks** ks, bond** bd, size_t nsite, si
 
     for(site_id=0;site_id<nsite;++site_id){
         nkink = kinks_get_nkink(ks[site_id]);
-        kink_id = kinks_get_sort(ks[site_id],0);
+        if(nkink>0){
+            kink_id = kinks_get_sort(ks[site_id],0);
         
-        assert(kinks_get_active(ks[site_id],kink_id));
-
-        bond_id = kinks_get_bond_id(ks[site_id],kink_id);
-        type_id = kinks_get_type_id(ks[site_id],kink_id);
-        nspin = bond_get_nspin(bd[bond_id]);
-        spin_id = type_id%(nspin/2);
-        type_id = type_id/(nspin/2);
-        ll2 = get_link_id(nbond,max_nspin,bond_id,type_id,spin_id);
-        fl = ll2;
-        for(rank_id=1;rank_id<nkink;++rank_id){
-            ll1 = ll2+nspin/2;
-            kink_id = kinks_get_sort(ks[site_id],rank_id);
             assert(kinks_get_active(ks[site_id],kink_id));
 
             bond_id = kinks_get_bond_id(ks[site_id],kink_id);
@@ -126,12 +115,26 @@ void loop_construct_outer_link(link* lk, kinks** ks, bond** bd, size_t nsite, si
             nspin = bond_get_nspin(bd[bond_id]);
             spin_id = type_id%(nspin/2);
             type_id = type_id/(nspin/2);
-
             ll2 = get_link_id(nbond,max_nspin,bond_id,type_id,spin_id);
-            link_set_linking(lk,ll1,ll2);
+            fl = ll2;
+            for(rank_id=1;rank_id<nkink;++rank_id){
+                ll1 = ll2+nspin/2;
+                kink_id = kinks_get_sort(ks[site_id],rank_id);
+
+                assert(kinks_get_active(ks[site_id],kink_id));
+
+                bond_id = kinks_get_bond_id(ks[site_id],kink_id);
+                type_id = kinks_get_type_id(ks[site_id],kink_id);
+                nspin = bond_get_nspin(bd[bond_id]);
+                spin_id = type_id%(nspin/2);
+                type_id = type_id/(nspin/2);
+
+                ll2 = get_link_id(nbond,max_nspin,bond_id,type_id,spin_id);
+                link_set_linking(lk,ll1,ll2);
+            }
+            ll1 = ll2+nspin/2;
+            link_set_linking(lk,fl,ll1);
         }
-        ll1 = ll2+nspin/2;
-        link_set_linking(lk,fl,ll1);
     }
 }
 
@@ -236,6 +239,47 @@ void loop_cluster_flip(kinks** ks, bond** bd, link* outer_lk, int nbond){
     }
 }
 
+void loop_cluster_sigma_i(kinks** ks, int nsite, gsl_rng* rng){
+    size_t site_id,kink_id;
+    double dis;
+    int sigma;
+
+    for(site_id=0;site_id<nsite;++site_id){
+        if(kinks_get_nkink(ks[site_id])==0){
+            dis = gsl_rng_uniform_pos(rng);
+            if(dis<0.5) kinks_set_sigma_i(ks[site_id],1);
+            else kinks_set_sigma_i(ks[site_id],-1);
+        }
+        else{
+            kink_id = kinks_get_sort(ks[site_id],0);
+            sigma = kinks_get_sigma_b(ks[site_id],kink_id);
+            kinks_set_sigma_i(ks[site_id],sigma);
+        }
+    }
+}
+
+int loop_cluster_check_periodic(kinks** ks, int nsite){
+    size_t site_id,kink_id,nkink;
+    int check=1,sigma_i,sigma_f;
+
+    for(site_id=0;site_id<nsite;++site_id){
+        nkink = kinks_get_nkink(ks[site_id]);
+        if(nkink!=0){
+            kink_id = kinks_get_sort(ks[site_id],0);
+            sigma_i = kinks_get_sigma_b(ks[site_id],kink_id);
+            kink_id = kinks_get_sort(ks[site_id],nkink-1);
+            sigma_f = kinks_get_sigma_a(ks[site_id],kink_id);
+
+            if(sigma_i!=sigma_f){
+                check=0;
+                break;
+            }
+        }
+    }
+
+    return check;
+}
+
 void loop_cluster_update_user_friendly(kinks** ks, bond** bd, int nsite, int nbond, gsl_rng* rng){
     size_t max_type_id;
     int max_nspin;
@@ -259,10 +303,15 @@ void loop_cluster_update_user_friendly(kinks** ks, bond** bd, int nsite, int nbo
     assert((outer_link->max_nspin)==(inner_link->max_nspin));
 
     //start the loop cluster update
+    assert(loop_cluster_check_periodic(ks,nsite));
+
     loop_construct_outer_link(outer_link,ks,bd,nsite,nbond);
     loop_construct_inner_link(inner_link,bd,nbond);
     loop_cluster_identify(outer_link,inner_link,rng);
     loop_cluster_flip(ks,bd,outer_link,nbond);
+    loop_cluster_sigma_i(ks,nsite,rng);
+
+    assert(loop_cluster_check_periodic(ks,nsite));
 }
 
 #if 1
@@ -291,50 +340,21 @@ int main(int argc, char** argv){
     kinks_set_sigma_i(ks[1],1);
 
 
-/*-------------------------------------------------------------------------*/
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,236298);
 
     size_t ns = 10;
-    double beta = 10.0;
-    double* taus = (double*)malloc(size*sizeof(double));
+    double beta = 100.0;
+    double* taus = (double*)malloc(ns*sizeof(double));
 
-    for(int j=0;j<10000;++j){
+    for(int j=0;j<100;++j){
         remove_all_graphs_with_no_kink(ks,&bd1,1);
+        sort_all_site_with_tau(ks,2);
         generate_graphs_with_uniform_dist(ks,&bd1,0,beta,&taus,&ns,rng,rule_4spin);
+        kinks_print_state(ks[0]);
+        kinks_print_state(ks[1]);
+        sort_all_site_with_tau(ks,2);
         loop_cluster_update_user_friendly(ks,&bd1,2,1,rng);
-    }
-
-/*-------------------------------------------------------------------------*/
-
-    int ntype = bond_get_ntype(bd1);
-    int nkink0 = kinks_get_nkink(ks[0]);
-    int nkink1 = kinks_get_nkink(ks[1]);
-
-    printf("ntype=%d | nkink0=%d | nkink1=%d\n",ntype,nkink0,nkink1);
-
-    size = bond_get_size(bd1);
-    for(size_t type_id=0; type_id<size; ++type_id){
-        int  type  = bond_get_type(bd1,type_id);
-        double tau = bond_get_tau(bd1,type_id);
-        int kink_id0 = bond_get_kink_id(bd1,type_id,0);
-        int kink_id1 = bond_get_kink_id(bd1,type_id,1);
-
-        printf("%zu %d %e %d %d\n",type_id,type,tau,kink_id0,kink_id1);
-    }
-
-    size = kinks_get_size(ks[0]);
-    for(size_t kink_id=0;kink_id<size;++kink_id){
-        int active0  = kinks_get_active(ks[0],kink_id);
-        int active1  = kinks_get_active(ks[1],kink_id);
-        int bond_id0 = kinks_get_bond_id(ks[0],kink_id);
-        int bond_id1 = kinks_get_bond_id(ks[1],kink_id);
-        int type_id0 = kinks_get_type_id(ks[0],kink_id);
-        int type_id1 = kinks_get_type_id(ks[1],kink_id);
-        double tau0  = kinks_get_tau(ks[0],kink_id);
-        double tau1  = kinks_get_tau(ks[1],kink_id);
-
-        printf("%zu | %d %d %d %e | %d %d %d %e\n",kink_id,active0,bond_id0,type_id0,tau0,active1,bond_id1,type_id1,tau1);
     }
 
     bond_free(bd1);
