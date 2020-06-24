@@ -78,6 +78,15 @@ int kinks_sigma_from_tau(const kinks* ks, double tau){
         int end = ks->size-1;
         int mid;
         int check=1;
+
+        if(tau<ks->tau[ks->sort[start]]){
+            sigma = ks->sigma_b[ks->sort[start]];
+            check = 0;
+        }
+        else if(tau>ks->tau[ks->sort[end]]){
+            sigma = ks->sigma_a[ks->sort[end]];
+            check = 0;
+        }
         
         while(check){
             mid = start + (end-start)/2;
@@ -234,6 +243,5 @@ void kinks_print_state(kinks* ks){
 
         printf("%.3f (%d,%d) bond_id=%zu type_id=%zu kink_id=%zu\n",tau,sigma_b,sigma_a,bond_id,type_id,kink_id);
     }
-    printf("End of printing state\n");
     printf("##################################################\n");
 }
