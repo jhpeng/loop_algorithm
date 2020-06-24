@@ -210,3 +210,36 @@ void bond_remove_graph(bond* bd, int type_id){
     bd->ntype--;
 }
 
+void bond_print_state(bond* bd){
+    size_t type_id,ntype,ngraph,nspin,size;
+    size_t i;
+    int type;
+    
+    size = bond_get_size(bd);
+    ntype = bond_get_ntype(bd);
+    ngraph = bond_get_ngraph(bd);
+    nspin = bond_get_nspin(bd);
+    
+    printf("##################################################\n");
+    printf("State of this bond...\n");
+    printf("size = %zu \n",size);
+    printf("nspin = %zu  site_id : (",nspin);
+    for(i=0;i<nspin/2;++i) printf(" %d",bond_get_site_id(bd,i));
+    printf(")\n");
+
+    printf("ngraph = %zu  weight : (",ngraph);
+    for(i=0;i<ngraph;++i) printf(" %.6f",bond_get_weight(bd,i));
+    printf(")\n");
+
+    printf("ntype = %zu\n",ntype);
+    for(type_id=0;type_id<size;++type_id){
+        if(bond_get_type(bd,type_id)!=-1){
+            type = bond_get_type(bd,type_id);
+            printf("type : %d  kink_id=[",type);
+            for(i=0;i<nspin/2;++i) printf(" %d",bond_get_kink_id(bd,type_id,i));
+            printf("]\n");
+        }
+    }
+    printf("End of printing state\n");
+    printf("##################################################\n");
+}

@@ -120,4 +120,7 @@ int bond_insert_graph(
 void bond_remove_graph(
                 bond* bd, 
                 int type_id);
+
+void bond_print_state(bond* bd);
+
 #endif
