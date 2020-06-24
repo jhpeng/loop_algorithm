@@ -211,3 +211,29 @@ void kinks_sort_index_with_tau(kinks* ks){
    gsl_sort_index(ks->sort,ks->tau,1,ks->size); 
 }
 
+void kinks_print_state(kinks* ks){
+    kinks_sort_index_with_tau(ks);
+    size_t size,rank_id,kink_id,bond_id,type_id,nkink;
+    int sigma_a,sigma_b,sigma_i;
+    double tau;
+    
+    size = kinks_get_size(ks);
+    nkink = kinks_get_nkink(ks);
+    sigma_i = kinks_get_sigma_i(ks);
+
+    printf("##################################################\n");
+    printf("State of this kinks...\n");
+    printf("size = %zu,  nkink = %zu, sigma_i = %d \n",size,nkink,sigma_i);
+    for(rank_id=0;rank_id<nkink;++rank_id){
+        kink_id = kinks_get_sort(ks,rank_id);
+        sigma_b = kinks_get_sigma_b(ks,kink_id);
+        sigma_a = kinks_get_sigma_a(ks,kink_id);
+        bond_id = kinks_get_bond_id(ks,kink_id);
+        type_id = kinks_get_type_id(ks,kink_id);
+        tau = kinks_get_tau(ks,kink_id);
+
+        printf("%.3f (%d,%d) bond_id=%zu type_id=%zu kink_id=%zu\n",tau,sigma_b,sigma_a,bond_id,type_id,kink_id);
+    }
+    printf("End of printing state\n");
+    printf("##################################################\n");
+}

@@ -89,4 +89,5 @@ void kinks_remove(
 void kinks_sort_index_with_tau(
                 kinks* ks);
 
+void kinks_print_state(kinks* ks);
 #endif
