@@ -179,28 +179,3 @@ void update_graph_user_friendly(kinks** ks, bond** bd, int nsite, int nbond, int
         }
     }
 }
-
-#if 0
-
-int main(int argc, char** argv){
-    size_t size = 10;
-    int max_nspin = 4;
-    int seed = 340323;
-
-    gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
-    gsl_rng_set(rng,seed);
-
-
-    double beta=100;
-    double lambda=1;
-    insertion_plan* plan = insertion_plan_alloc(size,max_nspin);
-
-    for(int i=0;i<10;++i){
-        uniform_dist_sequential_generation(plan,0,beta,lambda,rng);
-        printf("%zu %zu \n",plan->size,plan->ntau);
-    }
-
-    return 0;
-}
-
-#endif
