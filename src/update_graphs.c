@@ -1,6 +1,6 @@
 #include "update_graphs.h"
 
-insertion_plan* insertion_plan_alloc(size_t size, int max_nspin){
+insertion_plan* insertion_plan_alloc(int size, int max_nspin){
     insertion_plan* plan = (insertion_plan*)malloc(sizeof(insertion_plan));
     plan->size = size;
     plan->max_nspin = max_nspin;
@@ -15,7 +15,7 @@ insertion_plan* insertion_plan_alloc(size_t size, int max_nspin){
     return plan;
 }
 
-void insertion_plan_realloc(insertion_plan* plan, size_t size){
+void insertion_plan_realloc(insertion_plan* plan, int size){
     assert(size>plan->size);
     plan->size = size;
 
@@ -23,7 +23,7 @@ void insertion_plan_realloc(insertion_plan* plan, size_t size){
     plan->accept = (int*)realloc(plan->accept,size*sizeof(int));
     plan->sigma  = (int*)realloc(plan->sigma,plan->max_nspin/2*size*sizeof(int));
 
-    for(size_t i=0;i<size;++i) plan->accept[i]=0;
+    for(int i=0;i<size;++i) plan->accept[i]=0;
 }
 
 void insertion_plan_free(insertion_plan* plan){
@@ -58,7 +58,7 @@ void construct_insertion_plan(insertion_plan* plan, kinks** ks, bond** bd, doubl
 
     int nspin,spin_id,check;
     int site_id;
-    size_t i;
+    int i;
     double tau;
     graph* g = bond_get_graph(bd[bond_id],graph_id);
 
@@ -138,7 +138,7 @@ static void remove_graph_and_kinks(kinks** ks, bond** bd, int bond_id, int type_
 
 void remove_all_graphs_with_no_kink(kinks** ks, bond** bd, int nsite, int nbond){
     for(int bond_id=0;bond_id<nbond;++bond_id){
-        size_t size  = bond_get_size(bd[bond_id]);
+        int size  = bond_get_size(bd[bond_id]);
     
         for(int type_id=0;type_id<size;++type_id){
             int type = bond_get_type(bd[bond_id],type_id);
@@ -153,7 +153,7 @@ void remove_all_graphs_with_no_kink(kinks** ks, bond** bd, int nsite, int nbond)
 static insertion_plan* user_plan;
 void update_graph_user_friendly(kinks** ks, bond** bd, int nsite, int nbond, int max_nspin, double beta, gsl_rng* rng){
     if(user_plan==NULL){
-        size_t size = 100;
+        int size = 100;
         user_plan = insertion_plan_alloc(size,max_nspin);
     }
 
@@ -161,7 +161,7 @@ void update_graph_user_friendly(kinks** ks, bond** bd, int nsite, int nbond, int
 
     assert((user_plan->max_nspin)==max_nspin);
 
-    size_t bond_id,graph_id;
+    int bond_id,graph_id;
     int ngraph,nspin;
     int (*rule_nspin)(int*,int*);
     for(bond_id=0;bond_id<nbond;++bond_id){

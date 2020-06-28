@@ -39,7 +39,7 @@ int rule_4spin(int* rule, int* s){
     return rule[s[0]+s[1]+2*s[2]+4*s[3]];
 }
 
-bond* bond_alloc(size_t size, int nspin, int ngraph){
+bond* bond_alloc(int size, int nspin, int ngraph){
     bond* bd = (bond*)malloc(sizeof(bond));
     bd->size = size;
     bd->nspin = nspin;
@@ -52,7 +52,7 @@ bond* bond_alloc(size_t size, int nspin, int ngraph){
     bd->tau = (double*)malloc(size*sizeof(double));
     bd->kink_id = (int*)malloc(nspin/2*size*sizeof(int));
 
-    for(size_t i=0;i<size;++i){
+    for(int i=0;i<size;++i){
         bd->types[i] = -1;
         bd->tau[i] = DBL_MAX;
         for(int j=0;j<nspin/2;++j) bd->kink_id[i*nspin/2+j]=-1;
@@ -78,7 +78,7 @@ void bond_memcpy(bond* dest, const bond* src){
 
     int nspin = src->nspin;
     int ngraph = src->ngraph;
-    size_t size = src->size;
+    int size = src->size;
     
     for(int i=0;i<nspin/2;++i) dest->site_id[i] = src->site_id[i];
     for(int i=0;i<ngraph;++i){
@@ -88,7 +88,7 @@ void bond_memcpy(bond* dest, const bond* src){
 
     dest->ntype = src->ntype;
   
-    for(size_t i=0;i<size;++i){
+    for(int i=0;i<size;++i){
         dest->types[i] = src->types[i];
         dest->tau[i] = src->tau[i];
         for(int j=0;j<nspin/2;++j) 
@@ -113,7 +113,7 @@ void bond_set_graph(bond* bd, int ngraph, graph** graphs, const double* weight){
 
 int bond_check_available_id(bond* bd){
     int type_id=-1;
-    for(size_t i=0;i<bd->size;++i){
+    for(int i=0;i<bd->size;++i){
         if(bd->types[i]==-1){
             type_id = i;
             break;
@@ -151,11 +151,11 @@ double bond_get_weight(bond* bd, int type){
     return bd->weight[type];
 }
 
-size_t bond_get_size(bond* bd){
+int bond_get_size(bond* bd){
     return bd->size;
 }
 
-size_t bond_get_ntype(bond* bd){
+int bond_get_ntype(bond* bd){
     return bd->ntype;
 }
 
@@ -181,7 +181,7 @@ int bond_get_kink_id(bond* bd, int type_id, int site){
 int bond_insert_graph(bond* bd, int type, double tau, int* kink_id){
     assert(type<bd->ngraph);
     int type_id=-1;
-    for(size_t i=0;i<bd->size;++i){
+    for(int i=0;i<bd->size;++i){
         if(bd->types[i]==-1){
             type_id = i;
             break;
@@ -211,8 +211,8 @@ void bond_remove_graph(bond* bd, int type_id){
 }
 
 void bond_print_state(bond* bd){
-    size_t type_id,ntype,ngraph,nspin,size;
-    size_t i;
+    int type_id,ntype,ngraph,nspin,size;
+    int i;
     int type;
     
     size = bond_get_size(bd);

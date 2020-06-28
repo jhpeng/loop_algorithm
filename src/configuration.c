@@ -10,7 +10,7 @@ kinks* kinks_alloc(int size){
     ks->sigma_a  = (int*)malloc(size*sizeof(int));
     ks->bond_id  = (int*)malloc(size*sizeof(int));
     ks->type_id = (int*)malloc(size*sizeof(int));
-    ks->sort     = (size_t*)malloc(size*sizeof(size_t));
+    ks->sort     = (int*)malloc(size*sizeof(int));
     ks->tau = (double*)malloc(size*sizeof(double));
 
     for(int i=0;i<size;++i){
@@ -127,11 +127,11 @@ int kinks_check_no_kink(kinks* ks, int kink_id){
     else return 0;
 }
 
-size_t kinks_get_size(kinks* ks){
+int kinks_get_size(kinks* ks){
     return ks->size;
 }
 
-size_t kinks_get_nkink(kinks* ks){
+int kinks_get_nkink(kinks* ks){
     return ks->nkink;
 }
 
@@ -139,43 +139,43 @@ int kinks_get_sigma_i(kinks* ks){
     return ks->sigma_i;
 }
 
-int kinks_get_active(kinks* ks, size_t kink_id){
+int kinks_get_active(kinks* ks, int kink_id){
     assert(kink_id<ks->size);
 
     return ks->active[kink_id];
 }
 
-int kinks_get_sigma_b(kinks* ks, size_t kink_id){
+int kinks_get_sigma_b(kinks* ks, int kink_id){
     assert(kink_id<ks->size);
 
     return ks->sigma_b[kink_id];
 }
 
-int kinks_get_sigma_a(kinks* ks, size_t kink_id){
+int kinks_get_sigma_a(kinks* ks, int kink_id){
     assert(kink_id<ks->size);
 
     return ks->sigma_a[kink_id];
 }
 
-int kinks_get_bond_id(kinks* ks, size_t kink_id){
+int kinks_get_bond_id(kinks* ks, int kink_id){
     assert(kink_id<ks->size);
 
     return ks->bond_id[kink_id];
 }
 
-int kinks_get_type_id(kinks* ks, size_t kink_id){
+int kinks_get_type_id(kinks* ks, int kink_id){
     assert(kink_id<ks->size);
 
     return ks->type_id[kink_id];
 }
 
-double kinks_get_tau(kinks* ks, size_t kink_id){
+double kinks_get_tau(kinks* ks, int kink_id){
     assert(kink_id<ks->size);
 
     return ks->tau[kink_id];
 }
 
-size_t kinks_get_sort(kinks* ks, size_t rank){
+int kinks_get_sort(kinks* ks, int rank){
     assert(rank<ks->nkink);
 
     return ks->sort[rank];
@@ -222,7 +222,7 @@ void kinks_sort_index_with_tau(kinks* ks){
 
 void kinks_print_state(kinks* ks){
     kinks_sort_index_with_tau(ks);
-    size_t size,rank_id,kink_id,bond_id,type_id,nkink;
+    int size,rank_id,kink_id,bond_id,type_id,nkink;
     int sigma_a,sigma_b,sigma_i;
     double tau;
     

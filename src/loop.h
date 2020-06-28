@@ -13,21 +13,21 @@
 
 
 typedef struct link{
-    size_t size;
-    size_t nbond;
-    size_t max_type_id;
+    int size;
+    int nbond;
+    int max_type_id;
     int max_nspin;
     int* index;             //  max_nspin*(type_id*nbond+bond_id)+spin_id
 } link;
 
 link* link_alloc(
-                size_t nbond, 
-                size_t max_type_id, 
+                int nbond, 
+                int max_type_id, 
                 int max_nspin);
 
 void link_realloc(
                 link* lk, 
-                size_t max_type_id);
+                int max_type_id);
 
 void link_free(link* lk);
 
@@ -35,21 +35,21 @@ int link_check_init(link* lk);
 
 void link_measure_size(
                 bond** bd, 
-                size_t nbond, 
-                size_t* max_type_id, 
+                int nbond, 
+                int* max_type_id, 
                 int* mas_nspin);
 
 void loop_construct_outer_link(
                 link* lk, 
                 kinks** ks, 
                 bond** bd, 
-                size_t nsite, 
-                size_t nbond);
+                int nsite, 
+                int nbond);
 
 void loop_construct_inner_link(
                 link* lk, 
                 bond** bd, 
-                size_t nbond);
+                int nbond);
 
 void loop_cluster_identify(
                 link* outer_lk, 
