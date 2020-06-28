@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#define NDEBUG
 #include <assert.h>
 
 #include <gsl/gsl_rng.h>

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <float.h>
 #include <limits.h>
+#define NDEBUG
 #include <assert.h>
 
 #include <gsl/gsl_sort.h>
