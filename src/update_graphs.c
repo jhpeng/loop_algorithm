@@ -91,9 +91,30 @@ void construct_insertion_plan(insertion_plan* plan, kinks** ks, bond** bd, doubl
 void insert_graph_and_kinks(kinks** ks, bond** bd, insertion_plan* plan, int bond_id, int graph_id){
     int i,tau_id,type_id,site_id;
     int ntau = plan->ntau;
-    int nspin = bond_get_nspin(bd[bond_id]);
+    int nspin  = bond_get_nspin(bd[bond_id]);
+    int ngraph = bond_get_ngraph(bd[bond_id]);
     int kink_id[nspin/2];
     double tau;
+
+    int size_res;
+    for(i=0;i<nspin/2;++i){
+        site_id = bond_get_site_id(bd[bond_id],i);
+        size_res = (ks[site_id])->nkink+ntau;
+        if((ks[site_id])->size < size_res){
+            kinks* ks_temp = kinks_alloc(size_res);
+            kinks_memcpy(ks_temp,ks[site_id]);
+            kinks_free(ks[site_id]);
+            ks[site_id] = ks_temp;
+        }
+    }
+    
+    size_res = (bd[bond_id])->ntype+ntau;
+    if((bd[bond_id])->size < size_res){
+        bond* bd_temp = bond_alloc(size_res,nspin,ngraph);
+        bond_memcpy(bd_temp,bd[bond_id]);
+        bond_free(bd[bond_id]);
+        bd[bond_id] = bd_temp;
+    }
 
     for(tau_id=0;tau_id<ntau;++tau_id){
         if(plan->accept[tau_id]){
