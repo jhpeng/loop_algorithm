@@ -15,9 +15,9 @@
 #include "graph.h"
 
 typedef struct insertion_plan{
-    size_t size;
+    int size;
     int max_nspin;
-    size_t ntau;
+    int ntau;
     double* taus;
     int* accept;
     int* sigma;

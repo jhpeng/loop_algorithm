@@ -11,8 +11,8 @@
 #include <gsl/gsl_sort.h>
 
 typedef struct kinks{
-    size_t size;
-    size_t nkink;
+    int size;
+    int nkink;
     int sigma_i;
     int* active;
     int* sigma_b;
@@ -20,7 +20,7 @@ typedef struct kinks{
     int* bond_id;
     int* type_id;
     double* tau;
-    size_t* sort;
+    int* sort;
 } kinks;
 
 kinks* kinks_alloc(
@@ -56,25 +56,25 @@ int kinks_check_no_kink(
                 kinks* ks, 
                 int kink_id);
 
-size_t kinks_get_size(kinks* ks);
+int kinks_get_size(kinks* ks);
 
-size_t kinks_get_nkink(kinks* ks);
+int kinks_get_nkink(kinks* ks);
 
 int kinks_get_sigma_i(kinks* ks);
 
-int kinks_get_active(kinks* ks, size_t kink_id);
+int kinks_get_active(kinks* ks, int kink_id);
 
-int kinks_get_sigma_b(kinks* ks, size_t kink_id);
+int kinks_get_sigma_b(kinks* ks, int kink_id);
 
-int kinks_get_sigma_a(kinks* ks, size_t kink_id);
+int kinks_get_sigma_a(kinks* ks, int kink_id);
 
-int kinks_get_bond_id(kinks* ks, size_t kink_id);
+int kinks_get_bond_id(kinks* ks, int kink_id);
 
-int kinks_get_type_id(kinks* ks, size_t kink_id);
+int kinks_get_type_id(kinks* ks, int kink_id);
 
-double kinks_get_tau(kinks* ks, size_t kink_id);
+double kinks_get_tau(kinks* ks, int kink_id);
 
-size_t kinks_get_sort(kinks* ks, size_t rank);
+int kinks_get_sort(kinks* ks, int rank);
 
 int kinks_insert(
                 kinks* ks, 

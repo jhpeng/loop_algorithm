@@ -42,15 +42,15 @@ typedef struct bond{
     int ngraph;
     graph** graphs;
     double* weight;
-    size_t size;
-    size_t ntype;
+    int size;
+    int ntype;
     int* types;
     double* tau;
     int* kink_id;
 } bond;
 
 bond* bond_alloc(
-                size_t size, 
+                int size, 
                 int nspin, 
                 int ngraph);
 
@@ -93,10 +93,10 @@ double bond_get_weight(
                 bond* bd, 
                 int type);
 
-size_t bond_get_size(
+int bond_get_size(
                 bond* bd);
 
-size_t bond_get_ntype(
+int bond_get_ntype(
                 bond* bd);
 
 int bond_get_type(

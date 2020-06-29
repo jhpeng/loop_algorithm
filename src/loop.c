@@ -4,11 +4,11 @@
 static link* outer_link;
 static link* inner_link;
 
-static size_t get_link_id(size_t nbond, int max_nspin, size_t bond_id, size_t type_id, int spin_id){
+static int get_link_id(int nbond, int max_nspin, int bond_id, int type_id, int spin_id){
     return max_nspin*(type_id*nbond+bond_id)+spin_id;
 }
 
-link* link_alloc(size_t nbond, size_t max_type_id, int max_nspin){
+link* link_alloc(int nbond, int max_type_id, int max_nspin){
     link* lk = (link*)malloc(sizeof(link));
     lk->nbond = nbond;
     lk->max_type_id = max_type_id;
@@ -17,17 +17,17 @@ link* link_alloc(size_t nbond, size_t max_type_id, int max_nspin){
 
     lk->index = (int*)malloc((lk->size)*sizeof(int));
 
-    for(size_t i=0;i<lk->size;++i) lk->index[i]=-1;
+    for(int i=0;i<lk->size;++i) lk->index[i]=-1;
 
     return lk;
 }
 
-void link_realloc(link* lk, size_t max_type_id){
+void link_realloc(link* lk, int max_type_id){
     lk->max_type_id = max_type_id;
     lk->size = (lk->nbond)*max_type_id*(lk->max_nspin);
 
     lk->index = (int*)realloc(lk->index,(lk->size)*sizeof(int));
-    for(size_t i=0;i<lk->size;++i) lk->index[i]=-1;
+    for(int i=0;i<lk->size;++i) lk->index[i]=-1;
 }
 
 void link_free(link* lk){
@@ -37,7 +37,7 @@ void link_free(link* lk){
 
 int link_check_init(link* lk){
     int check=1;
-    for(size_t i=0;i<lk->size;++i){
+    for(int i=0;i<lk->size;++i){
         if(lk->index[i]!=-1){
             check=0;
             break;
@@ -47,22 +47,22 @@ int link_check_init(link* lk){
     return check;
 }
 
-void link_measure_size(bond** bd, size_t nbond, size_t* max_type_id, int* max_nspin){
+void link_measure_size(bond** bd, int nbond, int* max_type_id, int* max_nspin){
     *max_nspin=0;
     *max_type_id=0;
     int nspin;
-    int size_type;
+    int intype;
     for(int bond_id=0;bond_id<nbond;++bond_id){
         nspin = bond_get_nspin(bd[bond_id]);
-        size_type = bond_get_size(bd[bond_id]);
+        intype = bond_get_size(bd[bond_id]);
 
         if(nspin>*max_nspin) *max_nspin = nspin;
 
-        if(size_type>*max_type_id) *max_type_id = size_type;
+        if(intype>*max_type_id) *max_type_id = intype;
     }
 }
 
-static void link_set_linking(link* lk, size_t l1, size_t l2){
+static void link_set_linking(link* lk, int l1, int l2){
     assert(l1<lk->size);
     assert(l2<lk->size);
 
@@ -70,33 +70,33 @@ static void link_set_linking(link* lk, size_t l1, size_t l2){
     lk->index[l2] = l1;
 }
 
-static void link_set_one_way_linking(link* lk, size_t l1, size_t l2){
+static void link_set_one_way_linking(link* lk, int l1, int l2){
     assert(l1<lk->size);
     assert(l2<lk->size);
 
     lk->index[l1] = l2;
 }
 
-static int link_get_index(link* lk, size_t p){
+static int link_get_index(link* lk, int p){
     assert(p<lk->size);
 
     return lk->index[p];
 }
 
-static void link_erase_index(link* lk, size_t p){
+static void link_erase_index(link* lk, int p){
     assert(p<lk->size);
 
     lk->index[p] = -1;
 }
 
-static void link_insert_flip_flag(link* lk, size_t p){
+static void link_insert_flip_flag(link* lk, int p){
     assert(p<lk->size);
 
     lk->index[p] = -2;
 }
 
-void loop_construct_outer_link(link* lk, kinks** ks, bond** bd, size_t nsite, size_t nbond){
-    size_t rank_id,kink_id,site_id,bond_id,type_id,spin_id,nkink;
+void loop_construct_outer_link(link* lk, kinks** ks, bond** bd, int nsite, int nbond){
+    int rank_id,kink_id,site_id,bond_id,type_id,spin_id,nkink;
     int max_nspin = lk->max_nspin;
     int nspin,fl,ll1,ll2;
     
@@ -139,9 +139,9 @@ void loop_construct_outer_link(link* lk, kinks** ks, bond** bd, size_t nsite, si
 }
 
 
-void loop_construct_inner_link(link* lk, bond** bd, size_t nbond){
+void loop_construct_inner_link(link* lk, bond** bd, int nbond){
     int max_nspin = lk->max_nspin;
-    size_t l1,l2,size,bond_id,type_id,spin_id;
+    int l1,l2,size,bond_id,type_id,spin_id;
     int nspin,type;
     graph* g;
     
@@ -169,7 +169,7 @@ void loop_cluster_identify(link* outer_lk, link* inner_lk, gsl_rng* rng){
     assert((outer_lk->size)==(inner_lk->size));
 
     int scan_id,now_id,next_id;
-    size_t size = outer_lk->size;
+    int size = outer_lk->size;
     double dis;
     
     for(scan_id=0;scan_id<size;++scan_id){
@@ -204,7 +204,7 @@ void loop_cluster_identify(link* outer_lk, link* inner_lk, gsl_rng* rng){
 
 void loop_cluster_flip(kinks** ks, bond** bd, link* outer_lk, int nbond){
     int max_nspin = outer_lk->max_nspin;
-    size_t size,site_id,kink_id,bond_id,type_id,spin_id,link_id;
+    int size,site_id,kink_id,bond_id,type_id,spin_id,link_id;
     int nspin,flag;
     
     assert(nbond==outer_lk->nbond);
@@ -240,7 +240,7 @@ void loop_cluster_flip(kinks** ks, bond** bd, link* outer_lk, int nbond){
 }
 
 void loop_cluster_sigma_i(kinks** ks, int nsite, gsl_rng* rng){
-    size_t site_id,kink_id;
+    int site_id,kink_id;
     double dis;
     int sigma;
 
@@ -259,7 +259,7 @@ void loop_cluster_sigma_i(kinks** ks, int nsite, gsl_rng* rng){
 }
 
 int loop_cluster_check_periodic(kinks** ks, int nsite){
-    size_t site_id,kink_id,nkink;
+    int site_id,kink_id,nkink;
     int check=1,sigma_i,sigma_f;
 
     for(site_id=0;site_id<nsite;++site_id){
@@ -281,7 +281,7 @@ int loop_cluster_check_periodic(kinks** ks, int nsite){
 }
 
 void loop_cluster_update_user_friendly(kinks** ks, bond** bd, int nsite, int nbond, gsl_rng* rng){
-    size_t max_type_id;
+    int max_type_id;
     int max_nspin;
 
     link_measure_size(bd,nbond,&max_type_id,&max_nspin);
