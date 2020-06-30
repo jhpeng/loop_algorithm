@@ -232,7 +232,7 @@ void kinks_print_state(kinks* ks){
 
     printf("##################################################\n");
     printf("State of this kinks...\n");
-    printf("size = %zu,  nkink = %zu, sigma_i = %d \n",size,nkink,sigma_i);
+    printf("size = %d,  nkink = %d, sigma_i = %d \n",size,nkink,sigma_i);
     for(rank_id=0;rank_id<nkink;++rank_id){
         kink_id = kinks_get_sort(ks,rank_id);
         sigma_b = kinks_get_sigma_b(ks,kink_id);
@@ -241,7 +241,7 @@ void kinks_print_state(kinks* ks){
         type_id = kinks_get_type_id(ks,kink_id);
         tau = kinks_get_tau(ks,kink_id);
 
-        printf("%.3f (%d,%d) bond_id=%zu type_id=%zu kink_id=%zu\n",tau,sigma_b,sigma_a,bond_id,type_id,kink_id);
+        printf("%.3f (%d,%d) bond_id=%d type_id=%d kink_id=%d\n",tau,sigma_b,sigma_a,bond_id,type_id,kink_id);
     }
     printf("##################################################\n");
 }

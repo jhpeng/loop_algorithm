@@ -222,16 +222,16 @@ void bond_print_state(bond* bd){
     
     printf("##################################################\n");
     printf("State of this bond...\n");
-    printf("size = %zu \n",size);
-    printf("nspin = %zu  site_id : (",nspin);
+    printf("size = %d \n",size);
+    printf("nspin = %d  site_id : (",nspin);
     for(i=0;i<nspin/2;++i) printf(" %d",bond_get_site_id(bd,i));
     printf(")\n");
 
-    printf("ngraph = %zu  weight : (",ngraph);
+    printf("ngraph = %d  weight : (",ngraph);
     for(i=0;i<ngraph;++i) printf(" %.6f",bond_get_weight(bd,i));
     printf(")\n");
 
-    printf("ntype = %zu\n",ntype);
+    printf("ntype = %d\n",ntype);
     for(type_id=0;type_id<size;++type_id){
         if(bond_get_type(bd,type_id)!=-1){
             type = bond_get_type(bd,type_id);
