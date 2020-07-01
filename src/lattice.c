@@ -9,7 +9,7 @@ lattice* lattice_afm_heisenberg_2d_uniform(int lx, int ly, int seed){
     int nspin = 4;
     int nsite = lx*ly;
     int nbond = 2*lx*ly;
-    int init_size = 100;
+    int init_size = 1000;
 
     lattice* lat = (lattice*)malloc(sizeof(lattice));
     lat->shape = (int*)malloc(sizeof(int)*dim);
@@ -49,12 +49,14 @@ lattice* lattice_afm_heisenberg_2d_uniform(int lx, int ly, int seed){
             bond_set_site_id(lat->bd[i],4,site_id);
             bond_set_graph(lat->bd[i],1,g,w);
 
+
             lat->bd[i+nsite] = bond_alloc(init_size,nspin,1);
             j = ((y+1)%ly)*lx+x;
             site_id[0] = i;
             site_id[1] = j;
             bond_set_site_id(lat->bd[i+nsite],4,site_id);
             bond_set_graph(lat->bd[i+nsite],1,g,w);
+
         }
     }
 

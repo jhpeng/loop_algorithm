@@ -49,6 +49,8 @@ static void uniform_dist_sequential_generation(insertion_plan* plan, double xmin
         dis = gsl_rng_uniform_pos(rng);
         x = x - log(dis)/lambda;
     }
+
+    assert((plan->ntau) < (plan->size));
 }
 
 void construct_insertion_plan(insertion_plan* plan, kinks** ks, bond** bd, double beta, int bond_id, int graph_id, gsl_rng* rng, int (*rule_nspin)(int*,int*)){
@@ -99,7 +101,7 @@ void insert_graph_and_kinks(kinks** ks, bond** bd, insertion_plan* plan, int bon
     int size_res;
     for(i=0;i<nspin/2;++i){
         site_id = bond_get_site_id(bd[bond_id],i);
-        size_res = (ks[site_id])->nkink+ntau;
+        size_res = (ks[site_id])->nkink+ntau+100;
         if((ks[site_id])->size < size_res){
             kinks* ks_temp = kinks_alloc(size_res);
             kinks_memcpy(ks_temp,ks[site_id]);
@@ -108,7 +110,7 @@ void insert_graph_and_kinks(kinks** ks, bond** bd, insertion_plan* plan, int bon
         }
     }
     
-    size_res = (bd[bond_id])->ntype+ntau;
+    size_res = (bd[bond_id])->ntype+ntau+100;
     if((bd[bond_id])->size < size_res){
         bond* bd_temp = bond_alloc(size_res,nspin,ngraph);
         bond_memcpy(bd_temp,bd[bond_id]);

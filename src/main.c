@@ -6,9 +6,9 @@
 
 
 int main(int argc, char** argv){
-    int lx = 16;
-    int ly = 16;
-    double beta = 20.0;
+    int lx = 32;
+    int ly = 32;
+    double beta = 1024.0;
     int seed = 983894;
     int nsweep = 2000;
     
