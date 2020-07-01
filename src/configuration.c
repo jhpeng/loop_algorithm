@@ -10,7 +10,7 @@ kinks* kinks_alloc(int size){
     ks->sigma_a  = (int*)malloc(size*sizeof(int));
     ks->bond_id  = (int*)malloc(size*sizeof(int));
     ks->type_id = (int*)malloc(size*sizeof(int));
-    ks->sort     = (int*)malloc(size*sizeof(int));
+    ks->sort     = (size_t*)malloc(size*sizeof(size_t));
     ks->tau = (double*)malloc(size*sizeof(double));
 
     for(int i=0;i<size;++i){

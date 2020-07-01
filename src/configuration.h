@@ -20,7 +20,7 @@ typedef struct kinks{
     int* bond_id;
     int* type_id;
     double* tau;
-    int* sort;
+    size_t* sort;
 } kinks;
 
 kinks* kinks_alloc(
