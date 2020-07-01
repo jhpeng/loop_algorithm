@@ -83,8 +83,9 @@ void construct_insertion_plan(insertion_plan* plan, kinks** ks, bond** bd, doubl
 
         if(rule_nspin(g->rule,s) && check){
             plan->accept[i] = 1;
-            for(spin_id=0;spin_id<nspin/2;++spin_id) 
-                plan->sigma[(plan->max_nspin)*i+spin_id] = sigma[spin_id];
+            for(spin_id=0;spin_id<nspin/2;++spin_id){
+                plan->sigma[(plan->max_nspin/2)*i+spin_id] = sigma[spin_id];
+            }
         }
         else plan->accept[i] = 0;
     }
@@ -124,7 +125,7 @@ void insert_graph_and_kinks(kinks** ks, bond** bd, insertion_plan* plan, int bon
             type_id = bond_check_available_id(bd[bond_id]);
             for(i=0;i<nspin/2;++i){
                 site_id = bond_get_site_id(bd[bond_id],i);
-                kink_id[i] = kinks_insert(ks[site_id],bond_id,(nspin/2)*type_id+i,plan->sigma[plan->max_nspin*tau_id+i],tau);
+                kink_id[i] = kinks_insert(ks[site_id],bond_id,(nspin/2)*type_id+i,plan->sigma[plan->max_nspin/2*tau_id+i],tau);
             }
 
             type_id = bond_insert_graph(bd[bond_id],graph_id,tau,kink_id);
