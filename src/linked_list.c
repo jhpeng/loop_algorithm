@@ -104,7 +104,7 @@ void bond_node_print_all(bond_node* first){
     }
 }
 
-site_node* site_node_insertAfter(site_node* first, site_node* prev, double tau, int sigma, int spin_id, bond_node* bnode){
+site_node* site_node_insertAfter(site_node* prev, double tau, int sigma, int spin_id, bond_node* bnode){
     site_node* snode = site_node_alloc();
     snode->tau = tau;
     snode->sigma[0] = sigma;
@@ -112,7 +112,7 @@ site_node* site_node_insertAfter(site_node* first, site_node* prev, double tau, 
     snode->spin_id  = spin_id;
     snode->cont = bnode;
 
-    if(first==NULL && prev==NULL){
+    if(prev==NULL){
         return snode;
     }
     else if(prev->next==NULL){
@@ -127,10 +127,10 @@ site_node* site_node_insertAfter(site_node* first, site_node* prev, double tau, 
         snode->prev = prev;
     }
 
-    return first;
+    return snode;
 }
 
-site_node* site_node_insertBefore(site_node* first, site_node* next, double tau, int sigma, int spin_id, bond_node* bnode){
+site_node* site_node_insertBefore(site_node* next, double tau, int sigma, int spin_id, bond_node* bnode){
     site_node* snode = site_node_alloc();
     snode->tau = tau;
     snode->sigma[0] = sigma;
@@ -138,13 +138,11 @@ site_node* site_node_insertBefore(site_node* first, site_node* next, double tau,
     snode->spin_id  = spin_id;
     snode->cont = bnode;
 
-    if(first==NULL && next==NULL){
-        return snode;
+    if(next==NULL){
     }
     else if(next->prev==NULL){
         snode->next = next;
         next->prev = snode;
-        return snode;
     }
     else{
         site_node* prev = next->prev;
@@ -152,8 +150,8 @@ site_node* site_node_insertBefore(site_node* first, site_node* next, double tau,
         next->prev = snode;
         snode->next = next;
         snode->prev = prev;
-        return first;
     }
+    return snode;
 }
 
 site_node* site_node_remove(site_node* first, site_node* node){
@@ -192,7 +190,7 @@ site_node* site_node_remove_all(site_node* first){
     return NULL;
 }
 
-int linked_list_test(){
+void linked_list_test(){
     bond_node* first = NULL;
     first = bond_node_insertFirst(first,0,2);
     first = bond_node_insertFirst(first,0,2);
@@ -209,13 +207,12 @@ int linked_list_test(){
     site_node* sn = NULL;
 
     for(int i=0;i<100000;++i){
-        sn = site_node_insertBefore(sn,sn,0.9,1,0,NULL);
-        sn = site_node_insertBefore(sn,sn,0.8,1,0,NULL);
-        sn = site_node_insertBefore(sn,sn,0.7,1,0,NULL);
-        sn = site_node_insertBefore(sn,sn,0.6,1,0,NULL);
-        sn = site_node_insertBefore(sn,sn,0.5,1,0,NULL);
+        sn = site_node_insertBefore(sn,0.9,1,0,NULL);
+        sn = site_node_insertBefore(sn,0.8,1,0,NULL);
+        sn = site_node_insertBefore(sn,0.7,1,0,NULL);
+        sn = site_node_insertBefore(sn,0.6,1,0,NULL);
+        sn = site_node_insertBefore(sn,0.5,1,0,NULL);
     }
     
-
     sn = site_node_remove_all(sn);
 }

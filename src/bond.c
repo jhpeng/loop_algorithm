@@ -2,6 +2,12 @@
 
 bond* bond_alloc(int ngraph, int nspin){
     bond* b = (bond*)malloc(sizeof(bond));
+
+    if(b==NULL){
+        printf("bond_alloc : memory allocate fail!\n");
+        exit(1);
+    }
+
     b->nspin   = nspin;
     b->site_id = (int*)malloc(sizeof(int)*nspin);
     b->ngraph  = ngraph;
@@ -9,6 +15,12 @@ bond* bond_alloc(int ngraph, int nspin){
     b->graphs  = (graph**)malloc(sizeof(graph*)*ngraph);
     b->Nnode   = 0;
     b->first   = NULL;
+
+    if((b->site_id)==NULL || (b->weight)==NULL || (b->graphs)==NULL){
+        printf("bond_alloc : memory allocate fail!\n");
+        exit(1);
+    }
+
 
     return b;
 }

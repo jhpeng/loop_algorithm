@@ -55,7 +55,6 @@ void site_node_free(
                 site_node* sn);
 
 site_node* site_node_insertAfter(
-                site_node* first, 
                 site_node* prev, 
                 double tau, 
                 int sigma, 
@@ -63,7 +62,6 @@ site_node* site_node_insertAfter(
                 bond_node* bnode);
 
 site_node* site_node_insertBefore(
-                site_node* first, 
                 site_node* next, 
                 double tau, 
                 int sigma, 
