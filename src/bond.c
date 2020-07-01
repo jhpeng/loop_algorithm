@@ -92,3 +92,28 @@ void bond_remove_node(bond* b, bond_node* bnode){
     b->first = bond_node_remove(b->first,bnode);
     b->Nnode--;
 }
+
+void bond_test(){
+    int ngraph = 2;
+    int nspin  = 2;
+    int site_id[2] = {0,1};
+    double w[2] = {1.0,1.0};
+    graph* g[2] = {&GRAPH_HORI,&GRAPH_DIAG};
+    bond* b = bond_alloc(ngraph,nspin);
+
+    bond_set_site_id(b,site_id,2);
+    bond_set_graphs(b,g,ngraph);
+    bond_set_weight(b,w,ngraph);
+
+    bond_node* bn;
+
+    for(int i=0;i<2000;++i)
+        bn = bond_create_new_node(b,0);
+
+    bond_free(b);
+}
+
+//int main(){
+//    for(int i=0;i<10000;++i)
+//        bond_test();
+//}
