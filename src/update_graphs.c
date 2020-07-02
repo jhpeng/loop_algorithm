@@ -128,13 +128,13 @@ void insert_graph_and_kinks(kinks** ks, bond** bd, insertion_plan* plan, int bon
                 kink_id[i] = kinks_insert(ks[site_id],bond_id,(nspin/2)*type_id+i,plan->sigma[plan->max_nspin/2*tau_id+i],tau);
             }
 
-            type_id = bond_insert_graph(bd[bond_id],graph_id,tau,kink_id);
+            bond_insert_graph(bd[bond_id],graph_id,tau,kink_id,type_id);
         }
     }
-    for(i=0;i<nspin/2;++i){
-        site_id = bond_get_site_id(bd[bond_id],i);
-        kinks_sort_index_with_tau(ks[site_id]);
-    }
+    //for(i=0;i<nspin/2;++i){
+    //    site_id = bond_get_site_id(bd[bond_id],i);
+    //    kinks_sort_index_with_tau(ks[site_id]);
+    //}
 }
 
 static void remove_graph_and_kinks(kinks** ks, bond** bd, int bond_id, int type_id){
@@ -191,6 +191,8 @@ void update_graph_user_friendly(kinks** ks, bond** bd, int nsite, int nbond, int
     for(bond_id=0;bond_id<nbond;++bond_id){
         ngraph = bond_get_ngraph(bd[bond_id]);
         nspin  = bond_get_nspin(bd[bond_id]);
+        
+        //add new rule if nspin!=4
         if(nspin==4) rule_nspin = rule_4spin;
         else{
             printf("not yet to implement rule_nspin!\n");
@@ -202,4 +204,6 @@ void update_graph_user_friendly(kinks** ks, bond** bd, int nsite, int nbond, int
 
         }
     }
+    for(int site_id=0;site_id<nsite;++site_id)
+        kinks_sort_index_with_tau(ks[site_id]);
 }

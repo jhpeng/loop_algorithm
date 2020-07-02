@@ -75,7 +75,7 @@ int kinks_sigma_from_tau(const kinks* ks, double tau){
     if(ks->nkink==0) sigma = ks->sigma_i;
     else{
         int start = 0;
-        int end = ks->size-1;
+        int end = ks->nkink-1;
         int mid;
         int check=1;
 

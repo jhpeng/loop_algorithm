@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <float.h>
 #include <limits.h>
-//#define NDEBUG
+#define NDEBUG
 #include <assert.h>
 
 typedef struct graph{
@@ -112,11 +112,12 @@ int bond_get_kink_id(
                 int type_id, 
                 int site);
 
-int bond_insert_graph(
+void bond_insert_graph(
                 bond* bd, 
                 int type, 
                 double tau, 
-                int* kink_id);
+                int* kink_id,
+                int type_id);
 
 void bond_remove_graph(
                 bond* bd, 
