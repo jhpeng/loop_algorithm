@@ -3,6 +3,7 @@
 
 # define the C compiler
 CC	= gcc
+AR  = ar
 
 # define any compile-time flags
 CFLAGS = -Wall -g -fPIC -O0 -std=c99
@@ -21,18 +22,19 @@ LFLAGS	= -L/usr/local/lib
 LIBS	= -lm -lgsl -lgslcblas
 
 # define the C object files
-OBJS	= configuration.o graph.o update_graphs.o loop.o lattice.o main.o
+OBJS	= configuration.o graph.o update_graphs.o loop.o lattice.o
 
 #define the directory for object
 OBJSDIR = object
 
 # define the executable file
-MAIN	= exe
+MAIN	= ../lib/libloop.a
 
 all: $(MAIN)
 
 $(MAIN): $(OBJS)
-	$(CC) $(CFLAGS) -o $(MAIN) $(OBJS) $(LIBS) $(LFLAGS) $(INCLUDES) 
+	$(AR)  rcs  $(MAIN) $(OBJS)
+	cp *.h ../include
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $^
