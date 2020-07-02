@@ -184,9 +184,9 @@ int kinks_get_sort(kinks* ks, int rank){
 
 int kinks_insert(kinks* ks, int bond_id, int type_id, int sigma, double tau){
     int i, kink_id=-1;
-    for(i=0;i<ks->size;++i){
-        if(ks->active[i]==0){
-            kink_id = i;
+    for(i=ks->nkink;i<ks->size;++i){
+        if(ks->active[ks->sort[i]]==0){
+            kink_id = ks->sort[i];
             break;
         }
     }
