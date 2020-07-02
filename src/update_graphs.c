@@ -119,10 +119,24 @@ void insert_graph_and_kinks(kinks** ks, bond** bd, insertion_plan* plan, int bon
         bd[bond_id] = bd_temp;
     }
 
+    int bsize = bond_get_size(bd[bond_id]);
+    int* label = (int*)malloc(sizeof(int)*bsize);
+
+    i=0;
+    type_id=0;
+    while(i<ntau){
+        if(bond_get_type(bd[bond_id],type_id)==-1){
+            label[i] = type_id;
+            ++i;
+        }
+        ++type_id;
+    }
+
     for(tau_id=0;tau_id<ntau;++tau_id){
         if(plan->accept[tau_id]){
             tau = plan->taus[tau_id];
-            type_id = bond_check_available_id(bd[bond_id]);
+            //type_id = bond_check_available_id(bd[bond_id]);
+            type_id = label[tau_id];
             for(i=0;i<nspin/2;++i){
                 site_id = bond_get_site_id(bd[bond_id],i);
                 kink_id[i] = kinks_insert(ks[site_id],bond_id,(nspin/2)*type_id+i,plan->sigma[plan->max_nspin/2*tau_id+i],tau);
@@ -131,6 +145,8 @@ void insert_graph_and_kinks(kinks** ks, bond** bd, insertion_plan* plan, int bon
             bond_insert_graph(bd[bond_id],graph_id,tau,kink_id,type_id);
         }
     }
+
+    free(label);
     //for(i=0;i<nspin/2;++i){
     //    site_id = bond_get_site_id(bd[bond_id],i);
     //    kinks_sort_index_with_tau(ks[site_id]);
