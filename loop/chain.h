@@ -21,4 +21,16 @@ typedef struct chain{
     int state;
 } chain;
 
+chain* chain_alloc(int size);
+
+void chain_free(chain* c)
+
+void chain_realloc(chain* c, int size);
+
+void chain_insert(
+                chain* c, 
+                double* tau, 
+                int* key, 
+                int n, 
+                int spin_id);
 #endif
