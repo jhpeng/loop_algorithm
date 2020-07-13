@@ -2,10 +2,18 @@
 
 chain* chain_alloc(int size){
     chain* c = (chain*)malloc(sizeof(chain));
+    if(c==NULL){
+        printf("chain_alloc : memory allocating fail!\n");
+        exit(1);
+    }
     c->flag = 0;
     c->size = size;
     c->n = 0;
     c->node = (kink*)malloc(2*size*sizeof(kink));
+    if(c->node==NULL){
+        printf("chain_alloc : memory allocating fail!\n");
+        exit(1);
+    }
 
     for(int i=0;i<2*size;++i)
         (c->node)[i].key = UINT64_MAX;
@@ -21,6 +29,10 @@ void chain_free(chain* c){
 void chain_realloc(chain* c, int size){
     if(size>(c->size)){
         kink* ks = (kink*)malloc(2*size*sizeof(size));
+        if(ks==NULL){
+            printf("chain_realloc : memory allocating fail!\n");
+            exit(1);
+        }
 
         for(int i=0;i<2*size;++i)
             ks[i].key = UINT64_MAX;
@@ -34,7 +46,7 @@ void chain_realloc(chain* c, int size){
     }
 }
 
-void chain_insert(chain* c, double* tau, int* key, int n, int spin_id){
+void chain_insert(chain* c, double* tau, uint64_t* key, int n, int spin_id){
     assert((n+c->n)<=(c->size));
 
     int flag = c->flag;
@@ -87,16 +99,16 @@ void chain_insert(chain* c, double* tau, int* key, int n, int spin_id){
     c->n = k;
 }
 
-int main(){
+int chain_test(){
     int size = 1000;
     chain* c = chain_alloc(size);
     c->state = 1;
 
     double tau1[5] = {1,3,5,7,9};
-    int key1[5] = {1,2,3,4,5};
+    uint64_t key1[5] = {1,2,3,4,5};
 
     double tau2[3] = {2,4,6};
-    int key2[3] = {6,7,8};
+    uint64_t key2[3] = {6,7,8};
 
     chain_insert(c,tau1,key1,5,0);
     //for(int i=0;i<c->n;++i)
@@ -105,13 +117,15 @@ int main(){
     chain_insert(c,tau2,key2,3,1);
     for(int i=0;i<c->n;++i){
         double tau  = c->node[(c->flag)*(c->size)+i].tau;
-        int key     = c->node[(c->flag)*(c->size)+i].key;
+        uint64_t key     = c->node[(c->flag)*(c->size)+i].key;
         int spin_id = c->node[(c->flag)*(c->size)+i].spin_id;
-        printf("%.4f %d %d\n",tau,key,spin_id);
+        printf("%.4f %lld %d\n",tau,key,spin_id);
     }
     printf("\n%d\n",c->n);
 
     chain_free(c);
+
+    printf("%d\n",1<<10);
     
     return 0;
 }

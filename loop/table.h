@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#define NSPIN_MAX 16
+#define NSPIN_MAX 8
 
 typedef struct item{
     uint64_t key;
@@ -26,7 +26,7 @@ typedef struct table{
 } table;
 
 
-table* talbe_alloc(int scale);
+table* table_alloc(int scale);
 
 void table_free(table* t);
 

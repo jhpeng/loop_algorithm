@@ -1,6 +1,6 @@
 #include "table.h"
 
-table* talbe_alloc(int scale){
+table* table_alloc(int scale){
     int size = 1<<scale;
     
     table* t = (table*)malloc(sizeof(table));
@@ -67,4 +67,21 @@ item* table_search_from_key(table* t, uint64_t key){
     int i = table_hash(t,key);
 
     return &(t->list[i]);
+}
+
+int table_test(){
+    int scale = 13;
+
+    table* t = table_alloc(scale);
+    table_realloc(t);
+
+    for(int i=0;i<10;++i){
+        uint64_t u64 = table_generate_key(t);
+
+        printf("%llu\n",u64);
+    }   
+
+    table_free(t);
+
+    return 0;
 }

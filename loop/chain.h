@@ -23,14 +23,14 @@ typedef struct chain{
 
 chain* chain_alloc(int size);
 
-void chain_free(chain* c)
+void chain_free(chain* c);
 
 void chain_realloc(chain* c, int size);
 
 void chain_insert(
                 chain* c, 
                 double* tau, 
-                int* key, 
+                uint64_t* key, 
                 int n, 
                 int spin_id);
 #endif
