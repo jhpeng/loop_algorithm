@@ -51,7 +51,7 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
     int* ss1 = (int*)malloc(sizeof(int)*n);
     int* ss2 = (int*)malloc(sizeof(int)*n);
     int n1 = c1->n+1;
-    int n2 = c2->n-1;
+    int n2 = c2->n+1;
     int* s1 = (int*)malloc(sizeof(int)*n1);
     int* s2 = (int*)malloc(sizeof(int)*n2);
     double* tau1 = (double*)malloc(sizeof(double)*n1);
