@@ -6,16 +6,16 @@
 #include <stdint.h>
 #include <assert.h>
 
-#define NSPIN_MAX 8
+#define NSPIN_MAX 4
 
 typedef struct item{
     uint64_t key;
     int flag;
     int type;
     int nspin;
-    int state[NSPIN_MAX];
-    uint64_t link_key[NSPIN_MAX];
-    int link_spin[NSPIN_MAX];
+    int state[2*NSPIN_MAX];
+    uint64_t link_key[2*NSPIN_MAX];
+    int link_spin[2*NSPIN_MAX];
 } item;
 
 typedef struct table{

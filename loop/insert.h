@@ -11,4 +11,12 @@
 #include "chain.h"
 #include "table.h"
 
+void insert_horizontal_graph(
+                chain* c1, 
+                chain* c2, 
+                table* t, 
+                double w, 
+                double beta, 
+                gsl_rng* rng);
+
 #endif
