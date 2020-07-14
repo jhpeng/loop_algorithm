@@ -38,4 +38,6 @@ uint64_t table_generate_key(table* t);
 
 item* table_search_from_key(table* t, uint64_t key);
 
+void table_print_state(table* t);
+
 #endif

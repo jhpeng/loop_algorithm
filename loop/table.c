@@ -69,6 +69,30 @@ item* table_search_from_key(table* t, uint64_t key){
     return &(t->list[i]);
 }
 
+void table_print_state(table* t){
+    int size = t->size;
+    int n = t->n;
+    uint64_t key = t->key;
+
+    printf("---------------table--------------\n");
+    printf("size = %d\n",size);
+    printf("n    = %d\n",n);
+    printf("new key = %lu\n",key);
+
+    int flag,type,nspin;
+    printf("(key,flag,type,nspin)\n");
+    for(int i=0;i<size;++i){
+        if(t->list[i].key!=UINT64_MAX){
+            key   = t->list[i].key;
+            flag  = t->list[i].flag;
+            type  = t->list[i].type;
+            nspin = t->list[i].nspin;
+            printf("(%lu, %d, %d, %d)\n",key,flag,type,nspin);
+        }
+    }
+    printf("----------------------------------\n");
+}
+
 int table_test(){
     int scale = 13;
 
@@ -78,7 +102,7 @@ int table_test(){
     for(int i=0;i<10;++i){
         uint64_t u64 = table_generate_key(t);
 
-        printf("%llu\n",u64);
+        printf("%lu\n",u64);
     }   
 
     table_free(t);

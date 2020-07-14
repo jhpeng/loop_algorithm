@@ -121,7 +121,7 @@ void chain_print_state(chain* c){
         s1 = c->node[flag*size+i].state[1];
         spin_id = c->node[flag*size+i].spin_id;
         key = c->node[flag*size+i].key;
-        printf("%d (%.4f, %d, %d, %d, %llu)\n",i,tau,s0,s1,spin_id,key);
+        printf("%d (%.4f, %d, %d, %d, %lu)\n",i,tau,s0,s1,spin_id,key);
     }
     printf("---------------------------------\n");
 }
@@ -146,7 +146,7 @@ int chain_test(){
         double tau  = c->node[(c->flag)*(c->size)+i].tau;
         uint64_t key     = c->node[(c->flag)*(c->size)+i].key;
         int spin_id = c->node[(c->flag)*(c->size)+i].spin_id;
-        printf("%.4f %lld %d\n",tau,key,spin_id);
+        printf("%.4f %lu %d\n",tau,key,spin_id);
     }
     printf("\n%d\n",c->n);
 

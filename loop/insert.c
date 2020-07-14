@@ -150,6 +150,7 @@ int main(){
 
     chain_print_state(c1);
     chain_print_state(c2);
+    table_print_state(t);
     
 
     gsl_rng_free(rng);
