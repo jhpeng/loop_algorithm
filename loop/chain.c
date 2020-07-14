@@ -99,6 +99,33 @@ void chain_insert(chain* c, double* tau, uint64_t* key, int n, int spin_id){
     c->n = k;
 }
 
+void chain_print_state(chain* c){
+    int flag = c->flag;
+    int size = c->size;
+    int n = c->n;
+    int state = c->state;
+
+    printf("---------------------------------\n");
+    printf("flag = %d\n",flag);
+    printf("size = %d\n",size);
+    printf("n    = %d\n",n);
+    printf("initial state = %d\n",state);
+    printf("(tau,s0,s1,spin_id,key)\n");
+    
+    double tau;
+    int s0,s1,spin_id;
+    uint64_t key;
+    for(int i=0;i<n;++i){
+        tau = c->node[flag*size+i].tau;
+        s0 = c->node[flag*size+i].state[0];
+        s1 = c->node[flag*size+i].state[1];
+        spin_id = c->node[flag*size+i].spin_id;
+        key = c->node[flag*size+i].key;
+        printf("%d (%.4f, %d, %d, %d, %llu)\n",i,tau,s0,s1,spin_id,key);
+    }
+    printf("---------------------------------\n");
+}
+
 int chain_test(){
     int size = 1000;
     chain* c = chain_alloc(size);

@@ -33,4 +33,6 @@ void chain_insert(
                 uint64_t* key, 
                 int n, 
                 int spin_id);
+
+void chain_print_state(chain* c);
 #endif

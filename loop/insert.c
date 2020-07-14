@@ -125,7 +125,7 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
 }
 
 int main(){
-    int nc = 2048;
+    int nc = 10;
     int scale = 16;
     double w = 1.0;
     double beta = 10;
@@ -143,6 +143,13 @@ int main(){
 
 
     insert_horizontal_graph(c1,c2,t,w,beta,rng);
+    insert_horizontal_graph(c1,c2,t,w,beta,rng);
+    insert_horizontal_graph(c1,c2,t,w,beta,rng);
+    insert_horizontal_graph(c1,c2,t,w,beta,rng);
+
+    chain_print_state(c1);
+    chain_print_state(c2);
+    
 
 
     return 0;
