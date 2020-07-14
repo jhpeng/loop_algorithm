@@ -101,7 +101,6 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
         i = table_hash(t,key[k]);
 
         (t->list[i]).key = key[k];
-        (t->list[i]).flag  = 0;
         (t->list[i]).type  = 1;
         (t->list[i]).nspin = 2;
 

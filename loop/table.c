@@ -89,15 +89,14 @@ void table_print_state(table* t){
     printf("n    = %d\n",n);
     printf("new key = %lu\n",key);
 
-    int flag,type,nspin;
+    int type,nspin;
     printf("(key,flag,type,nspin)\n");
     for(int i=0;i<size;++i){
         if(t->list[i].key!=UINT64_MAX){
             key   = t->list[i].key;
-            flag  = t->list[i].flag;
             type  = t->list[i].type;
             nspin = t->list[i].nspin;
-            printf("(%lu, %d, %d, %d)\n",key,flag,type,nspin);
+            printf("(%lu, %d, %d)\n",key,type,nspin);
         }
     }
     printf("----------------------------------\n");

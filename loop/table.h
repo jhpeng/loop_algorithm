@@ -10,7 +10,6 @@
 
 typedef struct item{
     uint64_t key;
-    int flag;
     int type;
     int nspin;
     int state[2*NSPIN_MAX];
