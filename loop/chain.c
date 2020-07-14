@@ -28,7 +28,7 @@ void chain_free(chain* c){
 
 void chain_realloc(chain* c, int size){
     if(size>(c->size)){
-        kink* ks = (kink*)malloc(2*size*sizeof(size));
+        kink* ks = (kink*)malloc(2*size*sizeof(kink));
         if(ks==NULL){
             printf("chain_realloc : memory allocating fail!\n");
             exit(1);

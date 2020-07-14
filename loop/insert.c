@@ -80,6 +80,7 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
         tau = insert_tau[k];
         while(tau1[i]<tau) ++i;
         while(tau2[j]<tau) ++j;
+        printf("%.4f %.4f\n",tau1[i],tau2[j]);
 
         if((s1[i]!=s2[j] && tau1[i]!=tau) && tau2[j]!=tau){
             stau[m] = tau;
@@ -91,8 +92,8 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
 
     // check memory space and buffer
     while(2*(m+t->n)>(t->size)) table_realloc(t);
-    if((m+c1->n)>(c1->size)) chain_realloc(c1,(m+c1->n));
-    if((m+c2->n)>(c2->size)) chain_realloc(c2,(m+c2->n));
+    if(2*(m+c1->n)>(c1->size)) chain_realloc(c1,2*(m+c1->n));
+    if(2*(m+c2->n)>(c2->size)) chain_realloc(c2,2*(m+c2->n));
 
     uint64_t* key = (uint64_t*)malloc(sizeof(uint64_t)*m);
     for(k=0;k<m;++k){
@@ -125,7 +126,7 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
 }
 
 int main(){
-    int nc = 10;
+    int nc = 2048;
     int scale = 16;
     double w = 1.0;
     double beta = 10;
@@ -151,6 +152,12 @@ int main(){
     chain_print_state(c2);
     
 
+    gsl_rng_free(rng);
+    chain_free(c1);
+    chain_free(c2);
+    table_free(t);
+
+    free(insert_tau);
 
     return 0;
 }
