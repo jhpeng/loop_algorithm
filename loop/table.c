@@ -87,7 +87,7 @@ void table_print_state(table* t){
     printf("---------------table--------------\n");
     printf("size = %d\n",size);
     printf("n    = %d\n",n);
-    printf("new key = %lu\n",key);
+    printf("new key = %" PRIu64 "\n",key);
 
     int type,nspin;
     printf("(key,flag,type,nspin)\n");
@@ -96,7 +96,7 @@ void table_print_state(table* t){
             key   = t->list[i].key;
             type  = t->list[i].type;
             nspin = t->list[i].nspin;
-            printf("(%lu, %d, %d)\n",key,type,nspin);
+            printf("(%" PRIu64 ", %d, %d)\n",key,type,nspin);
         }
     }
     printf("----------------------------------\n");
@@ -111,7 +111,7 @@ int table_test(){
     for(int i=0;i<10;++i){
         uint64_t u64 = table_generate_key(t);
 
-        printf("%lu\n",u64);
+        printf("%" PRIu64 "\n",u64);
     }   
 
     table_free(t);
