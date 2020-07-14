@@ -80,7 +80,6 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
         tau = insert_tau[k];
         while(tau1[i]<tau) ++i;
         while(tau2[j]<tau) ++j;
-        printf("%.4f %.4f\n",tau1[i],tau2[j]);
 
         if((s1[i]!=s2[j] && tau1[i]!=tau) && tau2[j]!=tau){
             stau[m] = tau;
@@ -112,6 +111,7 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
 
     chain_insert(c1,stau,key,m,0);
     chain_insert(c2,stau,key,m,1);
+    t->n += m;
 
     // free the working space
     free(stau);
@@ -124,7 +124,7 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
     free(key);
 }
 
-int main(){
+int test_insert(){
     int nc = 2048;
     int scale = 16;
     double w = 1.0;

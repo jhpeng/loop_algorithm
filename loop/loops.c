@@ -61,3 +61,44 @@ void loops_update_chain(chain* c, table* t){
         }
     }
 }
+
+#include "insert.h"
+int main(){
+    int nc = 2048;
+    int scale = 16;
+    double w = 1.0;
+    double beta = 10;
+    int seed = 21203;
+    int nsweep = 1000;
+
+    gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
+    gsl_rng_set(rng,seed);
+
+    chain* c1 = chain_alloc(nc);
+    chain* c2 = chain_alloc(nc);
+    table* t = table_alloc(scale);
+
+    c1->state = 1;
+    c2->state = -1;
+
+
+    for(int i=0;i<nsweep;++i){
+        insert_horizontal_graph(c1,c2,t,w,beta,rng);
+        
+        loops_update_table(t);
+        loops_update_chain(c1,t);
+        loops_update_chain(c2,t);
+
+        //chain_print_state(c1);
+        //chain_print_state(c2);
+        //table_print_state(t);
+    }
+    
+
+    gsl_rng_free(rng);
+    chain_free(c1);
+    chain_free(c2);
+    table_free(t);
+
+    return 0;
+}

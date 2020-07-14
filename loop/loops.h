@@ -11,4 +11,8 @@
 #include "chain.h"
 #include "table.h"
 
+void loops_update_table(table* t);
+
+void loops_update_chain(chain* c, table* t);
+
 #endif
