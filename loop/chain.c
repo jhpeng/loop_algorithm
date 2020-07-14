@@ -55,6 +55,7 @@ void chain_insert(chain* c, double* tau, uint64_t* key, int n, int spin_id){
     int i=0;
     int j=0;
     int k=0;
+    int m;
 
     int state = c->state;
     while((i<n) && (j<(c->n))){
@@ -62,11 +63,12 @@ void chain_insert(chain* c, double* tau, uint64_t* key, int n, int spin_id){
             ++j;
         }
         else if(tau[i] < (c->node[flag*size+j]).tau){
-            c->node[(flag^1)*size+k].tau = tau[i];
-            c->node[(flag^1)*size+k].state[0] = state;
-            c->node[(flag^1)*size+k].state[1] = state;
-            c->node[(flag^1)*size+k].key = key[i];
-            c->node[(flag^1)*size+k].spin_id = spin_id;
+            m = (flag^1)*size+k;
+            c->node[m].tau = tau[i];
+            c->node[m].state[0] = state;
+            c->node[m].state[1] = state;
+            c->node[m].key = key[i];
+            c->node[m].spin_id = spin_id;
             ++i;
             ++k;
         }
@@ -86,11 +88,12 @@ void chain_insert(chain* c, double* tau, uint64_t* key, int n, int spin_id){
     }
     else if(j==(c->n)){
         for(;i<n;++i){
-            c->node[(flag^1)*size+k].tau = tau[i];
-            c->node[(flag^1)*size+k].state[0] = state;
-            c->node[(flag^1)*size+k].state[1] = state;
-            c->node[(flag^1)*size+k].key = key[i];
-            c->node[(flag^1)*size+k].spin_id = spin_id;
+            m = (flag^1)*size+k;
+            c->node[m].tau = tau[i];
+            c->node[m].state[0] = state;
+            c->node[m].state[1] = state;
+            c->node[m].key = key[i];
+            c->node[m].spin_id = spin_id;
             ++k;
         }
     }
