@@ -13,6 +13,17 @@
 
 void loops_update_table(table* t);
 
-void loops_update_chain(chain* c, table* t, gsl_rng* rng);
+void loops_update_chain(
+                chain* c, 
+                table* t, 
+                gsl_rng* rng);
+
+void loops_link_vertex(
+                chain* c, 
+                table* t);
+
+void loops_traverse(
+                table* t, 
+                gsl_rng* rng);
 
 #endif

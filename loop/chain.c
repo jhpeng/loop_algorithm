@@ -92,8 +92,10 @@ void chain_insert(chain* c, double* tau, uint64_t* key, int n, int spin_id){
 
     if(i==n){
         for(;j<(c->n);++j){
-            c->node[(flag^1)*size+k] = c->node[flag*size+j];
-            ++k;
+            if((c->node[flag*size+j]).key!=UINT64_MAX){
+                c->node[(flag^1)*size+k] = c->node[flag*size+j];
+                ++k;
+            }
         }
     }
     else if(j==(c->n)){

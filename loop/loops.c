@@ -77,7 +77,7 @@ void loops_link_vertex(chain* c, table* t){
     uint64_t key[2];
     item* it[2];
     if(n>0){
-        for(int i=0;i<(n-1);++i){
+        for(int i=0;i<n;++i){
             id[0] = flag*size+i;
             id[1] = flag*size+(i+1)%n;
             key[0] = c->node[id[0]].key;
@@ -118,12 +118,16 @@ static void loops_looping(table* t, int item_id, int spin_id, gsl_rng* rng){
         while(t->list[item_id].link_spin[spin_now]>=0){
             type = t->list[item_id].type;
             t->list[item_id].link_spin[spin_now] = flag;
+            t->list[item_id].link_key[spin_now] = UINT64_MAX;
             if(type==1){
                 key_next  = t->list[item_id].link_key[rule_hori[spin_now]];
                 spin_next = t->list[item_id].link_spin[rule_hori[spin_now]];
                 t->list[item_id].link_spin[rule_hori[spin_now]] = flag;
+                t->list[item_id].link_key[rule_hori[spin_now]] = UINT64_MAX;
             }
-            //printf("%d %lu %lu\n",item_id,key_now,key_next);
+
+            assert(key_now!=UINT64_MAX);
+            assert(key_next!=UINT64_MAX);
 
             key_now  = key_next;
             spin_now = spin_next;
@@ -139,7 +143,8 @@ void loops_traverse(table* t, gsl_rng* rng){
         if(t->list[item_id].key!=UINT64_MAX){
             nspin = t->list[item_id].nspin;
             for(spin_id=0;spin_id<2*nspin;spin_id+=2){
-                loops_looping(t,item_id,spin_id,rng);
+                if(t->list[item_id].link_spin[spin_id]>=0)
+                    loops_looping(t,item_id,spin_id,rng);
             }
         }
     }
@@ -173,6 +178,10 @@ int main(){
         for(int j=0;j<nx;++j)
             loops_link_vertex(c[j],t);
 
+        //for(int j=0;j<nx;++j)
+        //    chain_print_state(c[j]);
+
+        //table_print_state(t);
         loops_traverse(t,rng);
 
         loops_update_table(t);
@@ -180,8 +189,14 @@ int main(){
         for(int j=0;j<nx;++j)
             loops_update_chain(c[j],t,rng);
 
-        for(int j=0;j<nx;++j)
+        for(int j=0;j<nx;++j){
             printf("%d ",c[j]->state);
+            if(c[j]->state==0){
+                chain_print_state(c[j]);
+                table_print_state(t);
+                exit(1);
+            }
+        }
 
         printf("\n");
             //chain_print_state(c[j]);
