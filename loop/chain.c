@@ -15,8 +15,13 @@ chain* chain_alloc(int size){
         exit(1);
     }
 
-    for(int i=0;i<2*size;++i)
+    for(int i=0;i<2*size;++i){
         (c->node)[i].key = UINT64_MAX;
+        (c->node)[i].state[0] = 0;;
+        (c->node)[i].state[1] = 0;;
+        (c->node)[i].spin_id = -1;
+        (c->node)[i].tau = 0.0;
+    }
 
     return c;
 }
@@ -34,8 +39,13 @@ void chain_realloc(chain* c, int size){
             exit(1);
         }
 
-        for(int i=0;i<2*size;++i)
+        for(int i=0;i<2*size;++i){
             ks[i].key = UINT64_MAX;
+            ks[i].state[0] = 0;;
+            ks[i].state[1] = 0;;
+            ks[i].spin_id = -1;
+            ks[i].tau = 0.0;
+        }
 
         for(int i=0;i<(c->n);++i)
             ks[(c->flag)*size+i] = (c->node)[(c->flag)*(c->size)+i];

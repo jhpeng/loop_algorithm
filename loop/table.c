@@ -19,7 +19,10 @@ table* table_alloc(int scale){
     t->key = 0;
     for(int i=0;i<size;++i){
         t->list[i].key = UINT64_MAX;
+        t->list[i].type  = 0;
+        t->list[i].nspin = 0;
         for(int j=0;j<(2*NSPIN_MAX);++j){
+            t->list[i].state[j] = 0;
             t->list[i].link_key[j] = UINT64_MAX;
             t->list[i].link_spin[j] = -1;
         }
@@ -43,10 +46,13 @@ void table_realloc(table* t){
     }
 
     for(int i=0;i<size;++i){
-        t->list[i].key = UINT64_MAX;
+        it[i].key = UINT64_MAX;
+        it[i].type  = 0;
+        it[i].nspin = 0;
         for(int j=0;j<(2*NSPIN_MAX);++j){
-            t->list[i].link_key[j] = UINT64_MAX;
-            t->list[i].link_spin[j] = -1;
+            it[i].state[j] = 0;
+            it[i].link_key[j] = UINT64_MAX;
+            it[i].link_spin[j] = -1;
         }
     }
 
