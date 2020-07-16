@@ -56,8 +56,13 @@ void table_realloc(table* t){
         }
     }
 
-    for(int i=0;i<(t->size);++i)
-        it[i] = t->list[i];
+    int id;
+    for(int i=0;i<(t->size);++i){
+        if(t->list[i].key!=UINT64_MAX){
+            id = (t->list[i].key)&(size-1);
+            it[id] = t->list[i];
+        }
+    }
 
     free(t->list);
     t->list = it;
@@ -96,7 +101,7 @@ void table_print_state(table* t){
     printf("new key = %" PRIu64 "\n",key);
 
     int type,nspin;
-    printf("(key,flag,type,nspin)\n");
+    printf("(key,type,nspin)\n");
     for(int i=0;i<size;++i){
         if(t->list[i].key!=UINT64_MAX){
             key   = t->list[i].key;

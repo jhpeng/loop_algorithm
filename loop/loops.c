@@ -152,13 +152,13 @@ void loops_traverse(table* t, gsl_rng* rng){
 
 #include "insert.h"
 int main(){
-    int nc = 2048;
-    int scale = 16;
+    int nc = 20;
+    int scale = 10;
     double w = 1.0;
-    double beta = 10;
+    double beta = 1024;
     int seed = 21203;
-    int nsweep = 100;
-    int nx=8;
+    int nsweep = 10000;
+    int nx=20;
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
@@ -189,16 +189,17 @@ int main(){
         for(int j=0;j<nx;++j)
             loops_update_chain(c[j],t,rng);
 
+        printf("%d / %d\n",t->n,t->size);
         for(int j=0;j<nx;++j){
-            printf("%d ",c[j]->state);
+            printf("%d ",c[j]->n);
             if(c[j]->state==0){
                 chain_print_state(c[j]);
                 table_print_state(t);
                 exit(1);
             }
         }
-
         printf("\n");
+
             //chain_print_state(c[j]);
         //table_print_state(t);
     }
