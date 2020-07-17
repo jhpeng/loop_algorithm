@@ -157,9 +157,9 @@ int main(){
     int scale = 10;
     double w = 1.0;
     double beta = 1024;
-    int seed = 21203;
+    int seed = 324828;
     int nsweep = 10000;
-    int nx=8192;
+    int nx=128;
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
@@ -213,6 +213,18 @@ int main(){
 
             //chain_print_state(c[j]);
         //table_print_state(t);
+        
+        int step = 32;
+        int bins = (t->size)/step;
+        printf("bin size = %d\n",bins);
+        for(int j=0;j<step;++j){
+            int count=0;
+            for(int k=j*bins;k<(j+1)*bins;++k){
+                if(t->list[k].key!=UINT64_MAX) count++;
+            }
+            printf("%d ",(int)(1000*(double)count/(double)bins));
+        }
+        printf("\n\n");
     }
     
 
