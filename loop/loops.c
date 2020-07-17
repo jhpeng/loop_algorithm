@@ -126,8 +126,8 @@ static void loops_looping(table* t, int item_id, int spin_id, gsl_rng* rng){
                 t->list[item_id].link_key[rule_hori[spin_now]] = UINT64_MAX;
             }
 
-            assert(key_now!=UINT64_MAX);
-            assert(key_next!=UINT64_MAX);
+            //assert(key_now!=UINT64_MAX);
+            //assert(key_next!=UINT64_MAX);
 
             key_now  = key_next;
             spin_now = spin_next;
@@ -150,15 +150,16 @@ void loops_traverse(table* t, gsl_rng* rng){
     }
 }
 
+#include <time.h>
 #include "insert.h"
 int main(){
-    int nc = 20;
+    int nc = 40;
     int scale = 10;
     double w = 1.0;
     double beta = 1024;
     int seed = 21203;
     int nsweep = 10000;
-    int nx=20;
+    int nx=8192;
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
@@ -171,7 +172,11 @@ int main(){
 
     table* t = table_alloc(scale);
 
-    for(int i=0;i<nsweep;++i){
+    time_t start = clock();
+    time_t end;
+    uint64_t temp=0;
+    //for(int i=0;i<nsweep;++i){
+    while(1){
         for(int j=0;j<nx;++j)
             insert_horizontal_graph(c[j],c[(j+1)%nx],t,w,beta,rng);
         
@@ -189,9 +194,15 @@ int main(){
         for(int j=0;j<nx;++j)
             loops_update_chain(c[j],t,rng);
 
-        printf("%d / %d\n",t->n,t->size);
+        end = clock();
+        double my_time = difftime(end,start)/CLOCKS_PER_SEC;
+        double ratio = (double)table_statistic_index/(double)t->key;
+        double freq = (double)(table_statistic_index-temp)/my_time;
+        start = clock();
+        temp = table_statistic_index;
+        printf("%d / %d  |  %" PRIu64 " / %" PRIu64 "  |  %.10f  |  frequence=%.2f\n",t->n,t->size,table_statistic_index,t->key,ratio,freq);
         for(int j=0;j<nx;++j){
-            printf("%d ",c[j]->n);
+            //printf("%d ",c[j]->n);
             if(c[j]->state==0){
                 chain_print_state(c[j]);
                 table_print_state(t);

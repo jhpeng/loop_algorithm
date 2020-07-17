@@ -9,6 +9,8 @@
 
 #define NSPIN_MAX 4
 
+extern uint64_t table_statistic_index;
+
 typedef struct item{
     uint64_t key;
     int type;

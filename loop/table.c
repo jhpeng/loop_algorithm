@@ -73,12 +73,16 @@ int table_hash(table* t, uint64_t key){
     return (int)(key&(t->size-1));
 }
 
+uint64_t table_statistic_index=0;
 uint64_t table_generate_key(table* t){
     int i,check=1;
     while(check){
         ++(t->key);
         i = table_hash(t,t->key);
-        if(t->list[i].key==UINT64_MAX) check=0;
+        if(t->list[i].key==UINT64_MAX) {
+            check=0;
+            ++table_statistic_index;
+        }
     }
 
     return t->key;
