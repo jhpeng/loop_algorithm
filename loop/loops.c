@@ -152,14 +152,13 @@ void loops_traverse(table* t, gsl_rng* rng){
 
 #include <time.h>
 #include "insert.h"
-int main(){
+int loops_test(){
     int nc = 40;
     int scale = 10;
     double w = 1.0;
     double beta = 1024;
     int seed = 324828;
-    int nsweep = 10000;
-    int nx=128;
+    int nx=256;
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
@@ -198,7 +197,6 @@ int main(){
         double my_time = difftime(end,start)/CLOCKS_PER_SEC;
         double ratio = (double)table_statistic_index/(double)t->key;
         double freq = (double)(table_statistic_index-temp)/my_time;
-        start = clock();
         temp = table_statistic_index;
         printf("%d / %d  |  %" PRIu64 " / %" PRIu64 "  |  %.10f  |  frequence=%.2f\n",t->n,t->size,table_statistic_index,t->key,ratio,freq);
         for(int j=0;j<nx;++j){
@@ -225,6 +223,8 @@ int main(){
             printf("%d ",(int)(1000*(double)count/(double)bins));
         }
         printf("\n\n");
+
+        start = clock();
     }
     
 
