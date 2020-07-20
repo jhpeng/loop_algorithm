@@ -72,7 +72,7 @@ void loops_link_vertex(chain* c, table* t){
     int flag = c->flag;
 
     int id[2];
-    int nspin;
+    int nspin[2];
     int spin_id[2];
     uint64_t key[2];
     item* it[2];
@@ -88,12 +88,13 @@ void loops_link_vertex(chain* c, table* t){
             it[0] = table_search_from_key(t,key[0]);
             it[1] = table_search_from_key(t,key[1]);
 
-            nspin = it[0]->nspin;
+            nspin[0] = it[0]->nspin;
+            nspin[1] = it[1]->nspin;
 
-            it[0]->link_key[spin_id[0]+nspin] = key[1];
+            it[0]->link_key[spin_id[0]+nspin[0]] = key[1];
             it[1]->link_key[spin_id[1]] = key[0];
-            it[0]->link_spin[spin_id[0]+nspin] = spin_id[1];
-            it[1]->link_spin[spin_id[1]] = spin_id[0]+nspin;
+            it[0]->link_spin[spin_id[0]+nspin[0]] = spin_id[1];
+            it[1]->link_spin[spin_id[1]] = spin_id[0]+nspin[1];
         }
     }
 }
@@ -142,7 +143,7 @@ void loops_traverse(table* t, gsl_rng* rng){
     for(item_id=0;item_id<size;++item_id){
         if(t->list[item_id].key!=UINT64_MAX){
             nspin = t->list[item_id].nspin;
-            for(spin_id=0;spin_id<2*nspin;spin_id+=2){
+            for(spin_id=0;spin_id<2*nspin;spin_id+=1){
                 if(t->list[item_id].link_spin[spin_id]>=0)
                     loops_looping(t,item_id,spin_id,rng);
             }
