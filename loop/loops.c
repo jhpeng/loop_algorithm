@@ -60,7 +60,7 @@ void loops_update_chain(chain* c, table* t, gsl_rng* rng){
         }
     }
 
-    if(n>0) c->state = c->node[0].state[0];
+    if(n>0) c->state = c->node[flag*size].state[0];
     else{
         if(gsl_rng_uniform_pos(rng)<0.5) c->state *=-1;
     }
@@ -94,7 +94,7 @@ void loops_link_vertex(chain* c, table* t){
             it[0]->link_key[spin_id[0]+nspin[0]] = key[1];
             it[1]->link_key[spin_id[1]] = key[0];
             it[0]->link_spin[spin_id[0]+nspin[0]] = spin_id[1];
-            it[1]->link_spin[spin_id[1]] = spin_id[0]+nspin[1];
+            it[1]->link_spin[spin_id[1]] = spin_id[0]+nspin[0];
         }
     }
 }

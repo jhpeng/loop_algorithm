@@ -30,7 +30,6 @@ void model_afm_heisenderg_evolution(chain** c,table* t, model* m, gsl_rng* rng){
         }
     }
 
-
     loops_traverse(t,rng);
 
     for(i=0;i<t->size;++i){
@@ -45,6 +44,11 @@ void model_afm_heisenderg_evolution(chain** c,table* t, model* m, gsl_rng* rng){
 
     for(site_id=0;site_id<nsite;++site_id)
         loops_update_chain(c[site_id],t,rng);
+
+    //for(int i=0;i<m->nsite;++i)
+    //    chain_print_state(c[i]);
+
+    //table_print_state(t);
 }
 
 model* model_generate_afm_heisenberg_isotropy(int x, int y, double beta){
@@ -97,10 +101,10 @@ model* model_generate_afm_heisenberg_isotropy(int x, int y, double beta){
 int main(){
     int x=8;
     int y=8;
-    double beta = 30;
-    int nthermal = 2000;
-    int nblock = 1000000;
-    int nsweep = 1000;
+    double beta = 100;
+    int nthermal = 1000;
+    int nblock = 1000;
+    int nsweep = 2000;
     int nc = (int)beta;
     int scale = 16;
     int seed = 984293;
@@ -118,18 +122,20 @@ int main(){
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
 
-    for(int i=0;i<nthermal;++i){
-        model_afm_heisenderg_evolution(c,t,m,rng);
-    }
-
-
-
-
     double* sfactor = (double*)malloc(sizeof(double)*(m->nsite));
     for(int i=0;i<x;++i){
         for(int j=0;j<y;++j){
             sfactor[j*x+i] = ((i+j)%2)*2-1;
         }
+    }
+
+
+
+
+
+
+    for(int i=0;i<nthermal;++i){
+        model_afm_heisenderg_evolution(c,t,m,rng);
     }
 
     double mz2,mz1,mz;
@@ -168,25 +174,6 @@ int main(){
         ms1 = ms1/nsweep*0.5/(m->nsite);
         ng = ng/nsweep*0.5;
 
-        printf("chiu = %.6f, mz^2 = %.6f, ms1 = %.6f, ms2 = %.6f, n = %.2f\n",mz2*beta/(m->nsite),mz2,ms1,ms2,ng);
-        for(int i=0;i<x;++i){
-            for(int j=0;j<y;++j){
-                printf("%d\t",c[j*x+i]->state);
-            }
-            printf("\n\n");
-        }
-
-        int check=0;
-        for(int i=0;i<m->nsite;++i){
-            int id[2];
-            id[0] = (c[i]->flag)*(c[i]->size);
-            id[1] = (c[i]->flag)*(c[i]->size) + c[i]->n - 1;
-            if(c[i]->node[id[0]].state[0]!=c[i]->node[id[1]].state[1]){
-                printf("%d ",i);
-                check = 1;
-            }
-        }
-        if(check)
-            printf("error!\n");
+        printf("%.8f %.8f %.8f %.8f %.3f\n",mz2*beta/(m->nsite),mz2,ms1,ms2,ng);
     }
 }

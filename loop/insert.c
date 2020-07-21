@@ -58,12 +58,16 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
     double* tau2 = (double*)malloc(sizeof(double)*n2);
 
     for(int ii=0;ii<(n1-1);++ii){
-        s1[ii] = (c1->node[ii]).state[0];
-        tau1[ii] = (c1->node[ii]).tau;
+        int flag = c1->flag;
+        int size = c1->size;
+        s1[ii] = (c1->node[flag*size+ii]).state[0];
+        tau1[ii] = (c1->node[flag*size+ii]).tau;
     }
     for(int ii=0;ii<(n2-1);++ii){
-        s2[ii] = (c2->node[ii]).state[0];
-        tau2[ii] = (c2->node[ii]).tau;
+        int flag = c2->flag;
+        int size = c2->size;
+        s2[ii] = (c2->node[flag*size+ii]).state[0];
+        tau2[ii] = (c2->node[flag*size+ii]).tau;
     }
     s1[n1-1] = c1->state;
     s2[n2-1] = c2->state;
