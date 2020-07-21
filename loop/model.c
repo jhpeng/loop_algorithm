@@ -158,7 +158,7 @@ int main(){
 
             mz1 += mz;
             mz2 += mz*mz;
-            ms1 += abs(ms);
+            ms1 += fabs(ms);
             ms2 += ms*ms;
 
             int nng=0;
