@@ -11,6 +11,8 @@
 #include "chain.h"
 #include "table.h"
 
+#define INSERT_MAX 100000
+
 void insert_horizontal_graph(
                 chain* c1, 
                 chain* c2, 

@@ -128,7 +128,209 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
     free(key);
 }
 
-int test_insert(){
+/*
+         0 o
+          / \
+         /   \
+        /     \
+       / 3 o   \
+      /         \
+   1 o-----------o 2
+
+*/
+
+static double* chain_tau;
+static int* chain_state;
+static int* insert_state;
+static uint64_t* insert_key;
+
+//type 5 
+void insert_triangular_cut_graph(chain** c, table* t, double w, double beta, gsl_rng* rng){
+    int size = INSERT_MAX;
+    int nchain = NSPIN_MAX;
+    int ntau;
+
+    if(insert_tau==NULL){
+        insert_tau = (double*)malloc(sizeof(double)*size);
+        chain_tau  = (double*)malloc(sizeof(double)*size*nchain);
+        chain_state  = (int*)malloc(sizeof(int)*size*nchain); 
+        insert_state  = (int*)malloc(sizeof(int)*size*nchain); 
+        insert_key = (uint64_t*)malloc(sizeof(uint64_t)*size);
+        insert_size = size;
+
+        if(insert_tau==NULL){
+            printf("insert_horizontal_graph : allocating memory fail!\n");
+            exit(1);
+        }
+    }
+
+    generate_uniform_dist(insert_tau,&ntau,insert_size,w,beta,rng);
+
+    int i,j,flag,csize;
+    int n[4];
+    for(i=0;i<4;++i){
+        n[i] = c[i]->n + 1;
+        flag = c[i]->flag;
+        csize = c[i]->size;
+        for(j=0;j<(n[i]-1);++j){
+            chain_state[j+i*size] = (c[i]->node[flag*csize+j]).state[0];
+            chain_tau[j+i*size] = (c[i]->node[flag*csize+j]).tau;
+        }
+
+        chain_state[n[i]-1+i*size] = c[i]->state;
+        chain_tau[n[i]-1+i*size] = beta;
+    }
+
+    double tau;
+    int m=0;
+    int k;
+    for(i=0;i<4;++i) n[i] = 0;
+    for(k=0;k<ntau;++k){
+        tau = insert_tau[k];
+        for(i=0;i<4;++i){
+            while(chain_tau[i*size+n[i]]<tau) ++n[i];
+        }
+
+        int check = 1;
+        int det;
+        for(i=0;i<2;++i){
+            det = (chain_state[i*size+n[i]])*(chain_state[(i+1)*size+n[i+1]]);
+            if(det!=1)
+                check = 0;
+        }
+
+        if(check){
+            insert_tau[m] = tau;
+            for(i=0;i<4;++i)
+                insert_state[i*size+m] = chain_state[i*size+n[i]];
+            ++m;
+        }
+    }
+
+    // check memory space and buffer
+    while(2*(m+t->n)>(t->size)) table_realloc(t);
+    for(i=0;i<4;++i){
+        if(2*(m+c[i]->n)>(c[i]->size)) chain_realloc(c[i],2*(m+c[i]->n));
+    }
+
+    for(k=0;k<m;++k){
+        insert_key[k] = table_generate_key(t);
+        i = table_hash(t,insert_key[k]);
+
+        (t->list[i]).key = insert_key[k];
+        (t->list[i]).type  = 5;
+        (t->list[i]).nspin = 4;
+
+        for(j=0;j<4;++j){
+            (t->list[i]).state[j  ] = insert_state[j*size+k];
+            (t->list[i]).state[j+4] = insert_state[j*size+k];
+        }
+        for(j=0;j<8;++j){
+            (t->list[i]).link_key[j]  = UINT64_MAX;
+            (t->list[i]).link_spin[j] = -1;
+        }
+    }
+
+    for(i=0;i<4;++i)
+        chain_insert(c[i],insert_tau,insert_key,m,i);
+
+    t->n += m;
+}
+
+//type 6
+void insert_triangular_graph(chain** c, table* t, double w, double beta, gsl_rng* rng){
+    int size = INSERT_MAX;
+    int nchain = NSPIN_MAX;
+    int ntau;
+
+    if(insert_tau==NULL){
+        insert_tau = (double*)malloc(sizeof(double)*size);
+        chain_tau  = (double*)malloc(sizeof(double)*size*nchain);
+        chain_state  = (int*)malloc(sizeof(int)*size*nchain); 
+        insert_state  = (int*)malloc(sizeof(int)*size*nchain); 
+        insert_key = (uint64_t*)malloc(sizeof(uint64_t)*size);
+        insert_size = size;
+
+        if(insert_tau==NULL){
+            printf("insert_horizontal_graph : allocating memory fail!\n");
+            exit(1);
+        }
+    }
+
+    generate_uniform_dist(insert_tau,&ntau,insert_size,w,beta,rng);
+
+    int i,j,flag,csize;
+    int n[3];
+    for(i=0;i<3;++i){
+        n[i] = c[i]->n + 1;
+        flag = c[i]->flag;
+        csize = c[i]->size;
+        for(j=0;j<(n[i]-1);++j){
+            chain_state[j+i*size] = (c[i]->node[flag*csize+j]).state[0];
+            chain_tau[j+i*size] = (c[i]->node[flag*csize+j]).tau;
+        }
+
+        chain_state[n[i]-1+i*size] = c[i]->state;
+        chain_tau[n[i]-1+i*size] = beta;
+    }
+
+    double tau;
+    int m=0;
+    int k;
+    for(i=0;i<3;++i) n[i] = 0;
+    for(k=0;k<ntau;++k){
+        tau = insert_tau[k];
+        for(i=0;i<3;++i){
+            while(chain_tau[i*size+n[i]]<tau) ++n[i];
+        }
+
+        int check = 1;
+        int det;
+        for(i=0;i<2;++i){
+            det = (chain_state[i*size+n[i]])*(chain_state[(i+1)*size+n[i+1]]);
+            if(det!=1)
+                check = 0;
+        }
+
+        if(check){
+            insert_tau[m] = tau;
+            for(i=0;i<3;++i)
+                insert_state[i*size+m] = chain_state[i*size+n[i]];
+            ++m;
+        }
+    }
+
+    // check memory space and buffer
+    while(2*(m+t->n)>(t->size)) table_realloc(t);
+    for(i=0;i<3;++i){
+        if(2*(m+c[i]->n)>(c[i]->size)) chain_realloc(c[i],2*(m+c[i]->n));
+    }
+
+    for(k=0;k<m;++k){
+        insert_key[k] = table_generate_key(t);
+        i = table_hash(t,insert_key[k]);
+
+        (t->list[i]).key = insert_key[k];
+        (t->list[i]).type  = 6;
+        (t->list[i]).nspin = 3;
+
+        for(j=0;j<3;++j){
+            (t->list[i]).state[j  ] = insert_state[j*size+k];
+            (t->list[i]).state[j+3] = insert_state[j*size+k];
+        }
+        for(j=0;j<6;++j){
+            (t->list[i]).link_key[j]  = UINT64_MAX;
+            (t->list[i]).link_spin[j] = -1;
+        }
+    }
+
+    for(i=0;i<3;++i)
+        chain_insert(c[i],insert_tau,insert_key,m,i);
+
+    t->n += m;
+}
+
+int main(){
     int nc = 2048;
     int scale = 16;
     double w = 1.0;
@@ -138,30 +340,35 @@ int test_insert(){
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
 
-    chain* c1 = chain_alloc(nc);
-    chain* c2 = chain_alloc(nc);
+    chain* c[4];
+    c[0] = chain_alloc(nc);
+    c[1] = chain_alloc(nc);
+    c[2] = chain_alloc(nc);
+    c[3] = chain_alloc(nc);
     table* t = table_alloc(scale);
 
-    c1->state = 1;
-    c2->state = -1;
+    c[0]->state = 1;
+    c[1]->state = 1;
+    c[2]->state = 1;
+    c[3]->state = 1;
 
+    insert_triangular_cut_graph(c,t,w,beta,rng);
+    insert_triangular_cut_graph(c,t,w,beta,rng);
+    insert_triangular_graph(c,t,w,beta,rng);
 
-    insert_horizontal_graph(c1,c2,t,w,beta,rng);
-    insert_horizontal_graph(c1,c2,t,w,beta,rng);
-    insert_horizontal_graph(c1,c2,t,w,beta,rng);
-    insert_horizontal_graph(c1,c2,t,w,beta,rng);
-
-    chain_print_state(c1);
-    chain_print_state(c2);
+    chain_print_state(c[0]);
+    chain_print_state(c[1]);
+    chain_print_state(c[2]);
+    chain_print_state(c[3]);
     table_print_state(t);
     
 
     gsl_rng_free(rng);
-    chain_free(c1);
-    chain_free(c2);
+    chain_free(c[0]);
+    chain_free(c[1]);
+    chain_free(c[2]);
+    chain_free(c[3]);
     table_free(t);
-
-    free(insert_tau);
 
     return 0;
 }

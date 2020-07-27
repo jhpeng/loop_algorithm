@@ -98,13 +98,14 @@ model* model_generate_afm_heisenberg_isotropy(int x, int y, double beta){
     return m;
 }
 
-int main(){
-    int x=8;
-    int y=8;
-    double beta = 100;
-    int nthermal = 1000;
+#include <string.h>
+int model_test(int argc, char** argv){
+    int x=atoi(argv[1]);
+    int y=atoi(argv[2]);
+    double beta = atof(argv[3]);
+    int nthermal = 20000;
     int nblock = 1000;
-    int nsweep = 2000;
+    int nsweep = 1000;
     int nc = (int)beta;
     int scale = 16;
     int seed = 984293;
@@ -176,4 +177,6 @@ int main(){
 
         printf("%.8f %.8f %.8f %.8f %.3f\n",mz2*beta/(m->nsite),mz2,ms1,ms2,ng);
     }
+
+    return 0;
 }
