@@ -185,3 +185,18 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
         }
     }
 }
+
+void cluster_traverse(table* t, gsl_rng* rng){
+    int item_id,spin_id,nspin;
+    int size = t->size;
+
+    for(item_id=0;item_id<size;++item_id){
+        if(t->list[item_id].key!=UINT64_MAX){
+            nspin = t->list[item_id].nspin;
+            for(spin_id=0;spin_id<2*nspin;++spin_id){
+                if(t->list[item_id].link_spin[spin_id]<2*NSPIN_MAX)
+                    cluster_clustering(t,item_id,spin_id,rng);
+            }
+        }
+    }
+}

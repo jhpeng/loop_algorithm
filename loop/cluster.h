@@ -17,4 +17,6 @@ void claster_update_chain(chain* c, table* t);
 
 void cluster_link_vertex(chain* c, table* t);
 
+void cluster_traverse(table* t, gsl_rng* rng);
+
 #endif
