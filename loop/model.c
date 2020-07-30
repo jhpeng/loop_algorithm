@@ -105,10 +105,6 @@ void model_QLM_triangular_2d_update(chain** c, table* t, model* m, gsl_rng* rng)
     double beta = m->beta;
     double weight;
 
-    printf("Starting Monte Carlo update...\n");
-    printf("Removing unused graphs...\n");
-    printf("Inserting new graphs...\n");
-
     chain* c_temp[4];
     for(bond_id=0;bond_id<nbond;++bond_id){
         type = m->type[bond_id];
@@ -140,23 +136,16 @@ void model_QLM_triangular_2d_update(chain** c, table* t, model* m, gsl_rng* rng)
         }
     }
 
-    printf("Constructing link vertex list...\n");
     for(i=0;i<nsite;++i)
         cluster_link_vertex(c[i],t);
 
-    table_print_state(t);
-    printf("Muti-cluster updating...\n");
     cluster_traverse(t,rng);
 
-
-    printf("Updating table...\n");
     cluster_update_table(t);
 
-    printf("Updating chains...\n");
     for(i=0;i<nsite;++i)
         claster_update_chain(c[i],t);
 
-    printf("Finish Monte Carlo update!\n");
 }
 
 model* model_generate_QLM_triangular_2d(int x, int y, double beta){
@@ -249,9 +238,9 @@ model* model_generate_QLM_triangular_2d(int x, int y, double beta){
 #include <string.h>
 
 int main(){
-    int x = 2;
-    int y = 2;
-    double beta = 3.0;
+    int x = 16;
+    int y = 16;
+    double beta = 40.0;
     int seed = 2913;
 
     model* m = model_generate_QLM_triangular_2d(x,y,beta);
@@ -304,8 +293,22 @@ int main(){
 
     table* t = table_alloc(20);
 
-    for(int i=0;i<2000;++i)
+    for(int i=0;i<2000;++i){
         model_QLM_triangular_2d_update(c,t,m,rng);
+
+        int Ma=0;
+        int Mb=0;
+        for(int iy=0;iy<y;++iy){
+            for(int ix=0;ix<x;++ix){
+                Ma += c[iy*x+ix]->state;
+            }
+            for(int ix=0;ix<x;++ix){
+                Mb += c[iy*x+ix+x*y]->state;
+            }
+        }
+
+        printf("(Ma, Mb) = %d %d\n",Ma,Mb);
+    }
 
     return 0;
 }

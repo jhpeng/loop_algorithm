@@ -100,13 +100,13 @@ void cluster_link_vertex(chain* c, table* t){
 
 //type : 5
 //triangular cut graph
-static int cluster_tricut[64] = {0,1,2,3,4,5,-1,-1,
-                                 0,1,2,3,4,5,-1,-1,
-                                 0,1,2,3,4,5,-1,-1,
-                                 0,1,2,3,4,5,-1,-1,
-                                 0,1,2,3,4,5,-1,-1,
-                                 0,1,2,3,4,5,-1,-1,
-                                 6,-1,-1,-1,-1,-1,-1,-1,
+static int cluster_tricut[64] = {0,1,2,4,5,6,-1,-1,
+                                 0,1,2,4,5,6,-1,-1,
+                                 0,1,2,4,5,6,-1,-1,
+                                 3,-1,-1,-1,-1,-1,-1,-1,
+                                 0,1,2,4,5,6,-1,-1,
+                                 0,1,2,4,5,6,-1,-1,
+                                 0,1,2,4,5,6,-1,-1,
                                  7,-1,-1,-1,-1,-1,-1,-1};
 
 //type : 6
@@ -137,6 +137,7 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
     if(t->list[item_id].link_spin[spin_id]<nspin_max2){
         uint64_t key_now = t->list[item_id].key;
         int spin_now = spin_id;
+        int spin_next;
         int type,nspin,i;
         int* cluster;
 
@@ -145,9 +146,13 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
 
         int n=0;
         int m=0;
+        uint64_t key = t->list[item_id].key;
+        //for(int j_test=0;j_test<100;++j_test){
         while(m<=n){
             type  = t->list[item_id].type;
             nspin = t->list[item_id].nspin;
+            key = t->list[item_id].key;
+
 
             if(type==5) cluster = cluster_tricut;
             else if(type==6) cluster = cluster_triang;
@@ -157,7 +162,7 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
             }
 
             for(i=0;i<2*nspin;++i){
-                spin_id = cluster[nspin*spin_now+i];
+                spin_id = cluster[2*nspin*spin_now+i];
                 if(spin_id!=-1){
                     cluster_key[n]  = t->list[item_id].key;
                     cluster_spin[n] = spin_id;
@@ -167,9 +172,6 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
                 }
             }
 
-            if(m==n)
-                break;
-            
             while(m<n){
                 item_id = table_hash(t,cluster_key[m]);
                 key_now = t->list[item_id].link_key[cluster_spin[m]];
@@ -177,11 +179,15 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
                 spin_now -= nspin_max2*flag;
                 ++m;
 
+
                 item_id = table_hash(t,key_now);
-                spin_now = t->list[item_id].link_spin[spin_now];
-                if(spin_now<nspin_max2)
+                spin_next = t->list[item_id].link_spin[spin_now];
+                if(spin_next<nspin_max2)
                     break;
             }
+
+            if(m==n)
+                break;
         }
     }
 }
