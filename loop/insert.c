@@ -330,7 +330,7 @@ void insert_triangular_graph(chain** c, table* t, double w, double beta, gsl_rng
     t->n += m;
 }
 
-int main(){
+int test_insert(){
     int nc = 2048;
     int scale = 16;
     double w = 1.0;

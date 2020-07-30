@@ -21,4 +21,18 @@ void insert_horizontal_graph(
                 double beta, 
                 gsl_rng* rng);
 
+void insert_triangular_cut_graph(
+                chain** c, 
+                table* t, 
+                double w, 
+                double beta, 
+                gsl_rng* rng);
+
+void insert_triangular_graph(
+                chain** c, 
+                table* t, 
+                double w, 
+                double beta, 
+                gsl_rng* rng);
+
 #endif

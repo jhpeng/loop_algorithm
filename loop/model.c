@@ -1,6 +1,6 @@
 #include "model.h"
 
-void model_afm_heisenderg_evolution(chain** c,table* t, model* m, gsl_rng* rng){
+void model_afm_heisenderg_update(chain** c,table* t, model* m, gsl_rng* rng){
     int i,j,bond_id,site_id,type;
     int nsite = m->nsite;
     int nbond = m->nbond;
@@ -98,8 +98,219 @@ model* model_generate_afm_heisenberg_isotropy(int x, int y, double beta){
     return m;
 }
 
+void model_QLM_triangular_2d_update(chain** c, table* t, model* m, gsl_rng* rng){
+    int i,j,k,l,bond_id,type;
+    int nsite = m->nsite;
+    int nbond = m->nbond;
+    double beta = m->beta;
+    double weight;
+
+    printf("Starting Monte Carlo update...\n");
+    printf("Removing unused graphs...\n");
+    printf("Inserting new graphs...\n");
+
+    chain* c_temp[4];
+    for(bond_id=0;bond_id<nbond;++bond_id){
+        type = m->type[bond_id];
+        if(type==5){
+            i = m->bond2site[bond_id*NSPIN_MAX+0];
+            j = m->bond2site[bond_id*NSPIN_MAX+1];
+            k = m->bond2site[bond_id*NSPIN_MAX+2];
+            l = m->bond2site[bond_id*NSPIN_MAX+3];
+            weight = m->weight[bond_id];
+
+            c_temp[0] = c[i];
+            c_temp[1] = c[j];
+            c_temp[2] = c[k];
+            c_temp[3] = c[l];
+
+            insert_triangular_cut_graph(c_temp,t,weight,beta,rng);
+        }
+        else if(type==6){
+            i = m->bond2site[bond_id*NSPIN_MAX+0];
+            j = m->bond2site[bond_id*NSPIN_MAX+1];
+            k = m->bond2site[bond_id*NSPIN_MAX+2];
+            weight = m->weight[bond_id];
+
+            c_temp[0] = c[i];
+            c_temp[1] = c[j];
+            c_temp[2] = c[k];
+
+            insert_triangular_graph(c_temp,t,weight,beta,rng);
+        }
+    }
+
+    printf("Constructing link vertex list...\n");
+    for(i=0;i<nsite;++i)
+        cluster_link_vertex(c[i],t);
+
+    table_print_state(t);
+    printf("Muti-cluster updating...\n");
+    cluster_traverse(t,rng);
+
+
+    printf("Updating table...\n");
+    cluster_update_table(t);
+
+    printf("Updating chains...\n");
+    for(i=0;i<nsite;++i)
+        claster_update_chain(c[i],t);
+
+    printf("Finish Monte Carlo update!\n");
+}
+
+model* model_generate_QLM_triangular_2d(int x, int y, double beta){
+    int nsite = 2*x*y;
+    int nbond = 4*x*y;
+
+    double W = 1.0;
+
+    int* type = (int*)malloc(sizeof(int)*nbond);
+    int* bond2site = (int*)malloc(sizeof(int)*nbond*NSPIN_MAX);
+    double* weight = (double*)malloc(sizeof(double)*nbond);
+
+    int i,j,k,ix,iy,bond_id;
+    for(bond_id=0;bond_id<x*y;++bond_id){
+        type[bond_id] = 5;
+        weight[bond_id] = W;
+
+        ix = bond_id%x;
+        iy = bond_id/x;
+
+        i = iy*x+ix;
+        j = iy*x+(ix+1)%x;
+        k = ((iy+1)%y)*x+(ix+1)%x;
+
+        bond2site[bond_id*NSPIN_MAX+0] = i;
+        bond2site[bond_id*NSPIN_MAX+1] = j;
+        bond2site[bond_id*NSPIN_MAX+2] = k;
+        bond2site[bond_id*NSPIN_MAX+3] = j+x*y;
+    }
+    for(bond_id=0;bond_id<x*y;++bond_id){
+        type[bond_id+x*y] = 5;
+        weight[bond_id+x*y] = W;
+
+        ix = bond_id%x;
+        iy = bond_id/x;
+
+        i = iy*x+ix;
+        j = ((iy+1)%y)*x+ix;
+        k = ((iy+1)%y)*x+(ix+1)%x;
+
+        bond2site[(bond_id+x*y)*NSPIN_MAX+0] = i+x*y;
+        bond2site[(bond_id+x*y)*NSPIN_MAX+1] = j+x*y;
+        bond2site[(bond_id+x*y)*NSPIN_MAX+2] = k+x*y;
+        bond2site[(bond_id+x*y)*NSPIN_MAX+3] = j;
+    }
+    for(bond_id=0;bond_id<x*y;++bond_id){
+        type[bond_id+2*x*y] = 6;
+        weight[bond_id+2*x*y] = W;
+
+        ix = bond_id%x;
+        iy = bond_id/x;
+
+        i = iy*x+ix;
+        j = iy*x+(ix+1)%x;
+        k = ((iy+1)%y)*x+(ix+1)%x;
+
+        bond2site[(bond_id+2*x*y)*NSPIN_MAX+0] = i;
+        bond2site[(bond_id+2*x*y)*NSPIN_MAX+1] = j;
+        bond2site[(bond_id+2*x*y)*NSPIN_MAX+2] = k;
+    }
+    for(bond_id=0;bond_id<x*y;++bond_id){
+        type[bond_id+3*x*y] = 6;
+        weight[bond_id+3*x*y] = W;
+
+        ix = bond_id%x;
+        iy = bond_id/x;
+
+        i = iy*x+ix;
+        j = ((iy+1)%y)*x+ix;
+        k = ((iy+1)%y)*x+(ix+1)%x;
+
+        bond2site[(bond_id+3*x*y)*NSPIN_MAX+0] = i+x*y;
+        bond2site[(bond_id+3*x*y)*NSPIN_MAX+1] = j+x*y;
+        bond2site[(bond_id+3*x*y)*NSPIN_MAX+2] = k+x*y;
+    }
+
+
+    model* m = (model*)malloc(sizeof(model));
+
+    m->nsite = nsite;
+    m->nbond = nbond;
+    m->beta = beta;
+    m->type = type;
+    m->bond2site = bond2site;
+    m->weight = weight;
+
+    return m;
+}
+
 #include <string.h>
-int model_test(int argc, char** argv){
+
+int main(){
+    int x = 2;
+    int y = 2;
+    double beta = 3.0;
+    int seed = 2913;
+
+    model* m = model_generate_QLM_triangular_2d(x,y,beta);
+
+    int site[4];
+    for(int i=0;i<m->nbond/2;++i){
+        site[0] = m->bond2site[i*NSPIN_MAX+0];
+        site[1] = m->bond2site[i*NSPIN_MAX+1];
+        site[2] = m->bond2site[i*NSPIN_MAX+2];
+        site[3] = m->bond2site[i*NSPIN_MAX+3];
+
+        printf("bond_id=%d \t",i);
+        for(int j=0;j<4;++j){
+            if(!(site[j]<x*y)){
+                site[j] -= x*y;
+                printf("B %d  ",site[j]);
+            }
+            else{
+                printf("A %d  ",site[j]);
+            }
+        }
+        printf("\n");
+    }
+    for(int i=m->nbond/2;i<m->nbond;++i){
+        site[0] = m->bond2site[i*NSPIN_MAX+0];
+        site[1] = m->bond2site[i*NSPIN_MAX+1];
+        site[2] = m->bond2site[i*NSPIN_MAX+2];
+
+        printf("bond_id=%d \t",i);
+        for(int j=0;j<3;++j){
+            if(!(site[j]<x*y)){
+                site[j] -= x*y;
+                printf("B %d  ",site[j]);
+            }
+            else{
+                printf("A %d  ",site[j]);
+            }
+        }
+        printf("\n");
+    }
+
+    gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
+    gsl_rng_set(rng,seed);
+
+    chain* c[m->nsite];
+    for(int i=0;i<m->nsite;++i){
+       c[i] = chain_alloc(100);
+       c[i]->state = 1;
+    }
+
+    table* t = table_alloc(20);
+
+    for(int i=0;i<2000;++i)
+        model_QLM_triangular_2d_update(c,t,m,rng);
+
+    return 0;
+}
+
+int model_afm_heisenberg_test(int argc, char** argv){
     int x=atoi(argv[1]);
     int y=atoi(argv[2]);
     double beta = atof(argv[3]);
@@ -131,12 +342,8 @@ int model_test(int argc, char** argv){
     }
 
 
-
-
-
-
     for(int i=0;i<nthermal;++i){
-        model_afm_heisenderg_evolution(c,t,m,rng);
+        model_afm_heisenderg_update(c,t,m,rng);
     }
 
     double mz2,mz1,mz;
@@ -149,7 +356,7 @@ int model_test(int argc, char** argv){
         ms1 = 0;
         ng = 0;
         for(int i_sweep=0;i_sweep<nsweep;++i_sweep){
-            model_afm_heisenderg_evolution(c,t,m,rng);
+            model_afm_heisenderg_update(c,t,m,rng);
             mz = 0;
             ms = 0;
             for(int i=0;i<m->nsite;++i){
