@@ -95,8 +95,8 @@ void insert_horizontal_graph(chain* c1, chain* c2, table* t, double w, double be
 
     // check memory space and buffer
     while(2*(m+t->n)>(t->size)) table_realloc(t);
-    if(2*(m+c1->n)>(c1->size)) chain_realloc(c1,2*(m+c1->n));
-    if(2*(m+c2->n)>(c2->size)) chain_realloc(c2,2*(m+c2->n));
+    if((m+c1->n)>(c1->size)) chain_realloc(c1,(m+c1->n));
+    if((m+c2->n)>(c2->size)) chain_realloc(c2,(m+c2->n));
 
     uint64_t* key = (uint64_t*)malloc(sizeof(uint64_t)*m);
     for(k=0;k<m;++k){
