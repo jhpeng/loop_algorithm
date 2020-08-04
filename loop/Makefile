@@ -22,7 +22,7 @@ LIBS	= -lm -lgsl -lgslcblas
 
 
 #define the directory for object
-OBJS = chain.o table.o insert.o loops.o model.o
+OBJS = chain.o table.o insert.o loops.o cluster.o model.o
 
 # define the executable file
 MAIN = exe

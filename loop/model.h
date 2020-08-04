@@ -12,6 +12,7 @@
 #include "table.h"
 #include "insert.h"
 #include "loops.h"
+#include "cluster.h"
 
 
 typedef struct model{
