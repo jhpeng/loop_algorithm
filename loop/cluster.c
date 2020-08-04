@@ -200,7 +200,8 @@ void cluster_traverse(table* t, gsl_rng* rng){
         if(t->list[item_id].key!=UINT64_MAX){
             nspin = t->list[item_id].nspin;
             for(spin_id=0;spin_id<2*nspin;++spin_id){
-                if(t->list[item_id].link_spin[spin_id]<2*NSPIN_MAX)
+                if((t->list[item_id].link_spin[spin_id]<2*NSPIN_MAX) 
+                    && (t->list[item_id].link_spin[spin_id]>=0))
                     cluster_clustering(t,item_id,spin_id,rng);
             }
         }

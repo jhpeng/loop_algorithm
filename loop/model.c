@@ -101,42 +101,42 @@ model* model_generate_afm_heisenberg_isotropy(int x, int y, double beta){
 void model_QLM_triangular_2d_update(chain** c, table* t, model* m, gsl_rng* rng){
     int i,j,k,l,bond_id,type;
     int nsite = m->nsite;
-    int nbond = m->nbond;
+    //int nbond = m->nbond;
     double beta = m->beta;
     double weight;
 
+    int nsq = nsite/2;
+
     chain* c_temp[4];
-    for(bond_id=0;bond_id<nbond;++bond_id){
+    for(bond_id=0;bond_id<nsq;++bond_id){
         type = m->type[bond_id];
-        if(type==5){
-            i = m->bond2site[bond_id*NSPIN_MAX+0];
-            j = m->bond2site[bond_id*NSPIN_MAX+1];
-            k = m->bond2site[bond_id*NSPIN_MAX+2];
-            l = m->bond2site[bond_id*NSPIN_MAX+3];
-            weight = m->weight[bond_id];
+        i = m->bond2site[bond_id*NSPIN_MAX+0];
+        j = m->bond2site[bond_id*NSPIN_MAX+1];
+        k = m->bond2site[bond_id*NSPIN_MAX+2];
+        l = m->bond2site[bond_id*NSPIN_MAX+3];
+        weight = m->weight[bond_id];
 
-            c_temp[0] = c[i];
-            c_temp[1] = c[j];
-            c_temp[2] = c[k];
-            c_temp[3] = c[l];
+        c_temp[0] = c[i];
+        c_temp[1] = c[j];
+        c_temp[2] = c[k];
+        c_temp[3] = c[l];
 
-            insert_triangular_cut_graph(c_temp,t,weight,beta,rng);
-        }
-        else if(type==6){
-            i = m->bond2site[bond_id*NSPIN_MAX+0];
-            j = m->bond2site[bond_id*NSPIN_MAX+1];
-            k = m->bond2site[bond_id*NSPIN_MAX+2];
-            weight = m->weight[bond_id];
+        insert_triangular_cut_graph(c_temp,t,weight,beta,rng);
+    }
+    for(bond_id=3*nsq;bond_id<4*nsq;++bond_id){
+        i = m->bond2site[bond_id*NSPIN_MAX+0];
+        j = m->bond2site[bond_id*NSPIN_MAX+1];
+        k = m->bond2site[bond_id*NSPIN_MAX+2];
+        weight = m->weight[bond_id];
 
-            c_temp[0] = c[i];
-            c_temp[1] = c[j];
-            c_temp[2] = c[k];
+        c_temp[0] = c[i];
+        c_temp[1] = c[j];
+        c_temp[2] = c[k];
 
-            insert_triangular_graph(c_temp,t,weight,beta,rng);
-        }
+        insert_triangular_graph(c_temp,t,weight,beta,rng);
     }
 
-    for(i=0;i<nsite;++i)
+    for(i=nsq;i<2*nsq;++i)
         cluster_link_vertex(c[i],t);
 
     cluster_traverse(t,rng);
@@ -146,6 +146,43 @@ void model_QLM_triangular_2d_update(chain** c, table* t, model* m, gsl_rng* rng)
     for(i=0;i<nsite;++i)
         claster_update_chain(c[i],t);
 
+    for(bond_id=nsq;bond_id<2*nsq;++bond_id){
+        type = m->type[bond_id];
+        i = m->bond2site[bond_id*NSPIN_MAX+0];
+        j = m->bond2site[bond_id*NSPIN_MAX+1];
+        k = m->bond2site[bond_id*NSPIN_MAX+2];
+        l = m->bond2site[bond_id*NSPIN_MAX+3];
+        weight = m->weight[bond_id];
+
+        c_temp[0] = c[i];
+        c_temp[1] = c[j];
+        c_temp[2] = c[k];
+        c_temp[3] = c[l];
+
+        insert_triangular_cut_graph(c_temp,t,weight,beta,rng);
+    }
+    for(bond_id=2*nsq;bond_id<3*nsq;++bond_id){
+        i = m->bond2site[bond_id*NSPIN_MAX+0];
+        j = m->bond2site[bond_id*NSPIN_MAX+1];
+        k = m->bond2site[bond_id*NSPIN_MAX+2];
+        weight = m->weight[bond_id];
+
+        c_temp[0] = c[i];
+        c_temp[1] = c[j];
+        c_temp[2] = c[k];
+
+        insert_triangular_graph(c_temp,t,weight,beta,rng);
+    }
+
+    for(i=0;i<nsq;++i)
+        cluster_link_vertex(c[i],t);
+
+    cluster_traverse(t,rng);
+
+    cluster_update_table(t);
+
+    for(i=0;i<nsite;++i)
+        claster_update_chain(c[i],t);
 }
 
 model* model_generate_QLM_triangular_2d(int x, int y, double beta){
@@ -246,7 +283,8 @@ int main(){
     model* m = model_generate_QLM_triangular_2d(x,y,beta);
 
     int site[4];
-    for(int i=0;i<m->nbond/2;++i){
+    //for(int i=0;i<m->nbond/2;++i){
+    for(int i=0;i<0;++i){
         site[0] = m->bond2site[i*NSPIN_MAX+0];
         site[1] = m->bond2site[i*NSPIN_MAX+1];
         site[2] = m->bond2site[i*NSPIN_MAX+2];
@@ -264,7 +302,8 @@ int main(){
         }
         printf("\n");
     }
-    for(int i=m->nbond/2;i<m->nbond;++i){
+    //for(int i=m->nbond/2;i<m->nbond;++i){
+    for(int i=m->nbond/2;i<0;++i){
         site[0] = m->bond2site[i*NSPIN_MAX+0];
         site[1] = m->bond2site[i*NSPIN_MAX+1];
         site[2] = m->bond2site[i*NSPIN_MAX+2];
@@ -307,7 +346,7 @@ int main(){
             }
         }
 
-        printf("(Ma, Mb) = %d %d\n",Ma,Mb);
+        printf("%d %d\n",Ma,Mb);
     }
 
     return 0;
