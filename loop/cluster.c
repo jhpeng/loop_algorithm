@@ -127,7 +127,7 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
     assert(t->list[item_id].key!=UINT64_MAX);
 
     if(cluster_size==0){
-        cluster_size = 1000000;
+        cluster_size = 10000000;
         cluster_key  = (uint64_t*)malloc(sizeof(uint64_t)*cluster_size);
         cluster_spin = (int*)malloc(sizeof(int)*cluster_size);
     }
@@ -146,12 +146,9 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
 
         int n=0;
         int m=0;
-        uint64_t key = t->list[item_id].key;
-        //for(int j_test=0;j_test<100;++j_test){
         while(m<=n){
             type  = t->list[item_id].type;
             nspin = t->list[item_id].nspin;
-            key = t->list[item_id].key;
 
 
             if(type==5) cluster = cluster_tricut;
@@ -172,6 +169,7 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
                 }
             }
 
+            int check=1;
             while(m<n){
                 item_id = table_hash(t,cluster_key[m]);
                 key_now = t->list[item_id].link_key[cluster_spin[m]];
@@ -182,11 +180,13 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
 
                 item_id = table_hash(t,key_now);
                 spin_next = t->list[item_id].link_spin[spin_now];
-                if(spin_next<nspin_max2)
+                if(spin_next<nspin_max2){
+                    check=0;
                     break;
+                }
             }
 
-            if(m==n)
+            if(check)
                 break;
         }
     }

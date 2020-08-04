@@ -141,6 +141,12 @@ void chain_print_state(chain* c){
         state = s1;
         printf("%d (%.4f, %d, %d, %d, %" PRIu64 ") %d \n",i,tau,s0,s1,spin_id,key,check);
     }
+    s0 = c->node[flag*size].state[0];
+    s1 = c->node[flag*size+n-1].state[1];
+    if(s0!=s1){
+        printf("Vailoate the periodic boundary condition!\n");
+        exit(1);
+    }
     printf("---------------------------------\n");
 }
 

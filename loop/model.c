@@ -245,6 +245,7 @@ int main(){
 
     model* m = model_generate_QLM_triangular_2d(x,y,beta);
 
+    if(0){
     int site[4];
     for(int i=0;i<m->nbond/2;++i){
         site[0] = m->bond2site[i*NSPIN_MAX+0];
@@ -281,6 +282,7 @@ int main(){
         }
         printf("\n");
     }
+    }
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
@@ -296,6 +298,25 @@ int main(){
     for(int i=0;i<2000;++i){
         model_QLM_triangular_2d_update(c,t,m,rng);
 
+        for(int j=0;j<m->nsite;++j){
+            int n = c[j]->n;
+            if(n>0){
+                int size = c[j]->size;
+                int flag = c[j]->flag;
+                int s0 = c[j]->node[flag*size].state[0];
+                int s1 = c[j]->node[flag*size+n-1].state[1];
+
+                if(s0!=s1){
+                    printf("Vailoate the periodic boundary condition!\n");
+                    exit(1);
+                }
+            }
+        }
+    }
+
+    for(int i=0;i<20000;++i){
+        model_QLM_triangular_2d_update(c,t,m,rng);
+
         int Ma=0;
         int Mb=0;
         for(int iy=0;iy<y;++iy){
@@ -307,7 +328,7 @@ int main(){
             }
         }
 
-        printf("(Ma, Mb) = %d %d\n",Ma,Mb);
+        printf("%d %d\n",Ma,Mb);
     }
 
     return 0;
