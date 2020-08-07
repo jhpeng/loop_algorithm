@@ -98,6 +98,13 @@ void cluster_link_vertex(chain* c, table* t){
     }
 }
 
+//type : 4
+//triangular cut graph
+static int cluster_twolink[16] = {0,1,2,3,
+                                  0,1,2,3,
+                                  0,1,2,3,
+                                  0,1,2,3};
+
 //type : 5
 //triangular cut graph
 static int cluster_tricut[64] = {0,1,2,4,5,6,-1,-1,
@@ -111,7 +118,7 @@ static int cluster_tricut[64] = {0,1,2,4,5,6,-1,-1,
 
 //type : 6
 //triangular graph
-static int cluster_triang[64] = {0,1,2,3,4,5,
+static int cluster_triang[36] = {0,1,2,3,4,5,
                                  0,1,2,3,4,5,
                                  0,1,2,3,4,5,
                                  0,1,2,3,4,5,
@@ -151,7 +158,8 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
             nspin = t->list[item_id].nspin;
 
 
-            if(type==5) cluster = cluster_tricut;
+            if(type==4) cluster = cluster_twolink;
+            else if(type==5) cluster = cluster_tricut;
             else if(type==6) cluster = cluster_triang;
             else{
                 printf("cluster_clustering : no this type!\n");
