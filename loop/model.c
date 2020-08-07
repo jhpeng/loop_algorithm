@@ -284,8 +284,7 @@ int main(){
 
     if(0){
     int site[4];
-    //for(int i=0;i<m->nbond/2;++i){
-    for(int i=0;i<0;++i){
+    for(int i=0;i<m->nbond/2;++i){
         site[0] = m->bond2site[i*NSPIN_MAX+0];
         site[1] = m->bond2site[i*NSPIN_MAX+1];
         site[2] = m->bond2site[i*NSPIN_MAX+2];
@@ -303,8 +302,7 @@ int main(){
         }
         printf("\n");
     }
-    //for(int i=m->nbond/2;i<m->nbond;++i){
-    for(int i=m->nbond/2;i<0;++i){
+    for(int i=m->nbond/2;i<m->nbond;++i){
         site[0] = m->bond2site[i*NSPIN_MAX+0];
         site[1] = m->bond2site[i*NSPIN_MAX+1];
         site[2] = m->bond2site[i*NSPIN_MAX+2];
