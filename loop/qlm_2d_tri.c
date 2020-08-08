@@ -1,6 +1,172 @@
 #include "qlm_2d_tri.h"
 
-static void update_A(chain** c, table* t, model* m, gsl_rng* rng){
+static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
+    int ai,aj,ak,bi,bj,bk;
+    int block_id;
+    double beta = m->beta;
+
+    if(m->nsite!=2*x*y){
+        printf("gauss_law_A : nsite should be 2*x*y!\n");
+        exit(1);
+    }
+
+    int ix,iy;
+    int sb[3];
+    uint64_t key;
+    item* it;
+    for(block_id=0;block_id<x*y;++block_id){
+        ix = block_id%x;
+        iy = block_id/x;
+
+        ai = iy*x+ix;
+        aj = ((iy+1)%y)*x+ix;
+        ak = ((iy+1)%y)*x+(ix+1)%x;
+
+        bi = iy*x+ix               + x*y;
+        bj = iy*x+(ix+1)%x         + x*y;
+        bk = ((iy+1)%y)*x+(ix+1)%x + x*y;
+
+        sb[0] = c[bi]->state;
+        sb[1] = c[bj]->state;
+        sb[2] = c[bk]->state;
+
+        if(!((sb[0]==sb[1]) && (sb[1]==sb[2]))){
+            if(sb[0]==sb[1]){
+                key = table_generate_key(t);
+                chain_insert(c[aj],&beta,&key,1,0);
+                chain_insert(c[ak],&beta,&key,1,1);
+
+                it = table_search_from_key(t,key);
+                it->key   = key;
+                it->type  = 4;
+                it->nspin = 2;
+                it->state[0] = c[aj]->state;
+                it->state[1] = c[aj]->state;
+                it->state[2] = c[ak]->state;
+                it->state[3] = c[ak]->state;
+
+                ++t->n;
+            }
+            else if(sb[1]==sb[2]){
+                key = table_generate_key(t);
+                chain_insert(c[ai],&beta,&key,1,0);
+                chain_insert(c[aj],&beta,&key,1,1);
+
+                it = table_search_from_key(t,key);
+                it->key   = key;
+                it->type  = 4;
+                it->nspin = 2;
+                it->state[0] = c[ai]->state;
+                it->state[1] = c[ai]->state;
+                it->state[2] = c[aj]->state;
+                it->state[3] = c[aj]->state;
+
+                ++t->n;
+            }
+            else if(sb[2]==sb[0]){
+                key = table_generate_key(t);
+                chain_insert(c[ai],&beta,&key,1,0);
+                chain_insert(c[ak],&beta,&key,1,1);
+
+                it = table_search_from_key(t,key);
+                it->key   = key;
+                it->type  = 4;
+                it->nspin = 2;
+                it->state[0] = c[ai]->state;
+                it->state[1] = c[ai]->state;
+                it->state[2] = c[ak]->state;
+                it->state[3] = c[ak]->state;
+
+                ++t->n;
+            }
+        }
+    }
+}
+
+static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
+    int ai,aj,ak,bi,bj,bk;
+    int block_id;
+    double beta = m->beta;
+
+    if(m->nsite!=2*x*y){
+        printf("gauss_law_B : nsite should be 2*x*y!\n");
+        exit(1);
+    }
+
+    int ix,iy;
+    int sa[3];
+    uint64_t key;
+    item* it;
+    for(block_id=0;block_id<x*y;++block_id){
+        ix = block_id%x;
+        iy = block_id/x;
+
+        ai = iy*x+ix;
+        aj = ((iy+1)%y)*x+ix;
+        ak = ((iy+1)%y)*x+(ix+1)%x;
+
+        bi = iy*x+ix               + x*y;
+        bj = iy*x+(ix+1)%x         + x*y;
+        bk = ((iy+1)%y)*x+(ix+1)%x + x*y;
+
+        sa[0] = c[ai]->state;
+        sa[1] = c[aj]->state;
+        sa[2] = c[ak]->state;
+
+        if(!((sa[0]==sa[1]) && (sa[1]==sa[2]))){
+            if(sa[0]==sa[1]){
+                key = table_generate_key(t);
+                chain_insert(c[bj],&beta,&key,1,0);
+                chain_insert(c[bk],&beta,&key,1,1);
+
+                it = table_search_from_key(t,key);
+                it->key   = key;
+                it->type  = 4;
+                it->nspin = 2;
+                it->state[0] = c[bj]->state;
+                it->state[1] = c[bj]->state;
+                it->state[2] = c[bk]->state;
+                it->state[3] = c[bk]->state;
+
+                ++t->n;
+            }
+            else if(sa[1]==sa[2]){
+                key = table_generate_key(t);
+                chain_insert(c[bi],&beta,&key,1,0);
+                chain_insert(c[bj],&beta,&key,1,1);
+
+                it = table_search_from_key(t,key);
+                it->key   = key;
+                it->type  = 4;
+                it->nspin = 2;
+                it->state[0] = c[bi]->state;
+                it->state[1] = c[bi]->state;
+                it->state[2] = c[bj]->state;
+                it->state[3] = c[bj]->state;
+
+                ++t->n;
+            }
+            else if(sa[2]==sa[0]){
+                key = table_generate_key(t);
+                chain_insert(c[bi],&beta,&key,1,0);
+                chain_insert(c[bk],&beta,&key,1,1);
+
+                it = table_search_from_key(t,key);
+                it->key   = key;
+                it->type  = 4;
+                it->nspin = 2;
+                it->state[0] = c[bi]->state;
+                it->state[1] = c[bi]->state;
+                it->state[2] = c[bk]->state;
+                it->state[3] = c[bk]->state;
+
+                ++t->n;
+            }
+        }
+    }
+}
+
+static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     int i,j,k,l,bond_id;
     int nsite = m->nsite;
     double beta = m->beta;
@@ -40,6 +206,8 @@ static void update_A(chain** c, table* t, model* m, gsl_rng* rng){
         insert_triangular_graph(c_temp,t,weight,beta,rng);
     }
 
+    gauss_law_A(c,t,m,x,y);
+
     for(i=0;i<nsq;++i)
         cluster_link_vertex(c[i],t);
 
@@ -51,7 +219,7 @@ static void update_A(chain** c, table* t, model* m, gsl_rng* rng){
         claster_update_chain(c[i],t);
 }
 
-static void update_B(chain** c, table* t, model* m, gsl_rng* rng){
+static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     int i,j,k,l,bond_id;
     int nsite = m->nsite;
     double beta = m->beta;
@@ -90,6 +258,8 @@ static void update_B(chain** c, table* t, model* m, gsl_rng* rng){
 
         insert_triangular_graph(c_temp,t,weight,beta,rng);
     }
+
+    gauss_law_B(c,t,m,x,y);
 
     for(i=nsq;i<2*nsq;++i)
         cluster_link_vertex(c[i],t);
@@ -253,15 +423,15 @@ int main(int argc, char** argv){
 
     chain* c[m->nsite];
     for(int i=0;i<m->nsite;++i){
-       c[i] = chain_alloc(100);
+       c[i] = chain_alloc(2000);
        c[i]->state = 1;
     }
 
     table* t = table_alloc(20);
 
     for(int i=0;i<ntherm;++i){
-        update_A(c,t,m,rng);
-        update_B(c,t,m,rng);
+        update_A(c,t,m,x,y,rng);
+        update_B(c,t,m,x,y,rng);
 
         for(int j=0;j<m->nsite;++j){
             int n = c[j]->n;
@@ -280,8 +450,8 @@ int main(int argc, char** argv){
     }
 
     for(int i=0;i<nsweep;++i){
-        update_A(c,t,m,rng);
-        update_B(c,t,m,rng);
+        update_A(c,t,m,x,y,rng);
+        update_B(c,t,m,x,y,rng);
 
         int Ma=0;
         int Mb=0;
