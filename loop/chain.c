@@ -82,7 +82,7 @@ void chain_insert(chain* c, double* tau, uint64_t* key, int n, int spin_id){
             ++i;
             ++k;
         }
-        else if(tau[i] > (c->node[flag*size+j]).tau){
+        else if(tau[i] >= (c->node[flag*size+j]).tau){
             c->node[(flag^1)*size+k] = c->node[flag*size+j];
             state = c->node[flag*size+j].state[1];
             ++j;
