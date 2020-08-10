@@ -45,6 +45,11 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
                 it->state[2] = c[ak]->state;
                 it->state[3] = c[ak]->state;
 
+                for(int j=0;j<4;++j){
+                    it->link_key[j]  = UINT64_MAX;
+                    it->link_spin[j] = -1;
+                }
+
                 ++t->n;
             }
             else if(sb[1]==sb[2]){
@@ -61,6 +66,11 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
                 it->state[2] = c[aj]->state;
                 it->state[3] = c[aj]->state;
 
+                for(int j=0;j<4;++j){
+                    it->link_key[j]  = UINT64_MAX;
+                    it->link_spin[j] = -1;
+                }
+
                 ++t->n;
             }
             else if(sb[2]==sb[0]){
@@ -76,6 +86,11 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
                 it->state[1] = c[ai]->state;
                 it->state[2] = c[ak]->state;
                 it->state[3] = c[ak]->state;
+
+                for(int j=0;j<4;++j){
+                    it->link_key[j]  = UINT64_MAX;
+                    it->link_spin[j] = -1;
+                }
 
                 ++t->n;
             }
@@ -128,6 +143,11 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
                 it->state[2] = c[bk]->state;
                 it->state[3] = c[bk]->state;
 
+                for(int j=0;j<4;++j){
+                    it->link_key[j]  = UINT64_MAX;
+                    it->link_spin[j] = -1;
+                }
+
                 ++t->n;
             }
             else if(sa[1]==sa[2]){
@@ -143,6 +163,11 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
                 it->state[1] = c[bi]->state;
                 it->state[2] = c[bj]->state;
                 it->state[3] = c[bj]->state;
+
+                for(int j=0;j<4;++j){
+                    it->link_key[j]  = UINT64_MAX;
+                    it->link_spin[j] = -1;
+                }
 
                 ++t->n;
             }
@@ -160,6 +185,11 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
                 it->state[2] = c[bk]->state;
                 it->state[3] = c[bk]->state;
 
+                for(int j=0;j<4;++j){
+                    it->link_key[j]  = UINT64_MAX;
+                    it->link_spin[j] = -1;
+                }
+
                 ++t->n;
             }
         }
@@ -172,7 +202,7 @@ static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     double beta = m->beta;
     double weight;
 
-    int nsq = nsite/2;
+    int nsq = x*y;
 
     chain* c_temp[4];
     for(bond_id=nsq;bond_id<2*nsq;++bond_id){
@@ -435,17 +465,19 @@ int main(int argc, char** argv){
 
         for(int j=0;j<m->nsite;++j){
             int n = c[j]->n;
-            if(n>0){
+            for(int k=0;n>k;++k){
                 int size = c[j]->size;
                 int flag = c[j]->flag;
-                int s0 = c[j]->node[flag*size].state[0];
-                int s1 = c[j]->node[flag*size+n-1].state[1];
+                int s0 = c[j]->node[flag*size+(k+1)%n].state[0];
+                int s1 = c[j]->node[flag*size+k].state[1];
 
                 if(s0!=s1){
                     printf("Vailoate the periodic boundary condition!\n");
                     exit(1);
                 }
             }
+
+            //chain_print_state(c[j]);
         }
     }
 
