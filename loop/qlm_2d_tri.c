@@ -198,7 +198,6 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
 
 static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     int i,j,k,l,bond_id;
-    int nsite = m->nsite;
     double beta = m->beta;
     double weight;
 
@@ -241,21 +240,48 @@ static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     for(i=0;i<nsq;++i)
         cluster_link_vertex(c[i],t);
 
+#if 0
+    int s0,s1,nspin,spin_id,size,flag;
+    uint64_t key;
+    item* it;
+    chain* ct;
+    for(i=0;i<nsq;++i){
+        ct = c[i+nsq];
+        for(j=0;j<ct->n;++j){
+            size = ct->size;
+            flag = ct->flag;
+            key     = ct->node[size*flag+j].key;
+            spin_id = ct->node[size*flag+j].spin_id;
+
+            it = table_search_from_key(t,key);
+            nspin = it->nspin;
+
+            s0 = it->link_spin[spin_id      ];
+            s1 = it->link_spin[spin_id+nspin];
+
+            if(s0!=-1 || s1!=-1){
+                printf("update_A : sometinh wrong %d %d\n",s0,s1);
+                exit(1);
+            }
+        }
+    }
+#endif
+
     cluster_traverse(t,rng);
 
     cluster_update_table(t);
 
-    for(i=0;i<nsite;++i)
+    //for(i=0;i<nsq;++i)
+    for(i=0;i<2*nsq;++i)
         claster_update_chain(c[i],t);
 }
 
 static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     int i,j,k,l,bond_id;
-    int nsite = m->nsite;
     double beta = m->beta;
     double weight;
 
-    int nsq = nsite/2;
+    int nsq = x*y;
 
     chain* c_temp[4];
     for(bond_id=0;bond_id<nsq;++bond_id){
@@ -294,11 +320,39 @@ static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     for(i=nsq;i<2*nsq;++i)
         cluster_link_vertex(c[i],t);
 
+#if 0
+    int s0,s1,nspin,spin_id,size,flag;
+    uint64_t key;
+    item* it;
+    chain* ct;
+    for(i=0;i<nsq;++i){
+        ct = c[i];
+        for(j=0;j<ct->n;++j){
+            size = ct->size;
+            flag = ct->flag;
+            key     = ct->node[size*flag+j].key;
+            spin_id = ct->node[size*flag+j].spin_id;
+
+            it = table_search_from_key(t,key);
+            nspin = it->nspin;
+
+            s0 = it->link_spin[spin_id      ];
+            s1 = it->link_spin[spin_id+nspin];
+
+            if(s0!=-1 || s1!=-1){
+                printf("update_B : sometinh wrong %d %d\n",s0,s1);
+                exit(1);
+            }
+        }
+    }
+#endif
+
     cluster_traverse(t,rng);
 
     cluster_update_table(t);
 
-    for(i=0;i<nsite;++i)
+    //for(i=nsq;i<2*nsq;++i)
+    for(i=0;i<2*nsq;++i)
         claster_update_chain(c[i],t);
 }
 
@@ -307,7 +361,7 @@ model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
     int nbond = 4*x*y;
 
     double w1 = 1.0;
-    double w2 = lambda;
+    double w2 = 0.5*lambda;
 
     int* type = (int*)malloc(sizeof(int)*nbond);
     int* bond2site = (int*)malloc(sizeof(int)*nbond*NSPIN_MAX);
@@ -390,7 +444,86 @@ model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
     return m;
 }
 
+#include <gsl/gsl_sort.h>
 #include <string.h>
+double* mtau;
+size_t* msite;
+size_t* msort;
+int msize=0;
+void qlm_measurement(chain** c, model* m, int x, int y, double lambda){
+    int xy = m->nsite/2;
+    int i,j,n,size,flag,s0,s1;
+
+    int* sigma = (int*)malloc(sizeof(int)*m->nsite);
+    int Ma=0;
+    int Mb=0;
+    size = 0;
+    for(i=0;i<m->nsite;++i){
+        size += c[i]->n;
+        sigma[i] = c[i]->state;
+        if(i<xy) Ma+=c[i]->state;
+        else Mb+=c[i]->state;
+    }
+
+
+    if(msize==0){
+        msize = size;
+        mtau  = (double*)malloc(sizeof(double)*msize);
+        msite = (size_t*)malloc(sizeof(size_t)*msize);
+        msort = (size_t*)malloc(sizeof(size_t)*msize);
+    }
+    else if(size>msize){
+        msize = size;
+        mtau  = (double*)realloc(mtau ,sizeof(double)*msize);
+        msite = (size_t*)realloc(msite,sizeof(size_t)*msize);
+        msort = (size_t*)realloc(msort,sizeof(size_t)*msize);
+    }
+
+    n=0;
+    for(i=0;i<m->nsite;++i){
+        for(j=0;c[i]->n>j;++j){
+            size = c[i]->size;
+            flag = c[i]->flag;
+
+            s0 = c[i]->node[flag*size+j].state[0];
+            s1 = c[i]->node[flag*size+j].state[1];
+            if(s0!=s1){
+                mtau[n]  = c[i]->node[flag*size+j].tau;
+                msite[n] = (size_t)i;
+                ++n;
+            }
+        }
+    }
+
+    gsl_sort_index(msort,mtau,1,n);
+
+    double Ma2=0;
+    double Mb2=0;
+    for(j=0;j<n;++j){
+        i = msort[j];
+        if(msite[i]<xy)
+            Ma += -sigma[msite[i]]*2;
+        else
+            Mb += -sigma[msite[i]]*2;
+
+        sigma[msite[i]] *= -1;
+
+        Ma2 += Ma*Ma;
+        Mb2 += Mb*Mb;
+    }
+
+    Ma2 = Ma2/n*2;
+    Mb2 = Mb2/n*2;
+
+    char fname[128];
+    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f.txt",x,y,m->beta,lambda);
+    FILE* myfile = fopen(fname,"a");
+    fprintf(myfile,"%d %d %.10e %.10e\n",Ma,Mb,Ma2,Mb2);
+    fclose(myfile);
+
+    free(sigma);
+}
+
 
 int main(int argc, char** argv){
     int x = atoi(argv[1]);
@@ -463,6 +596,7 @@ int main(int argc, char** argv){
         update_A(c,t,m,x,y,rng);
         update_B(c,t,m,x,y,rng);
 
+        int ng = 0;
         for(int j=0;j<m->nsite;++j){
             int n = c[j]->n;
             for(int k=0;n>k;++k){
@@ -475,10 +609,18 @@ int main(int argc, char** argv){
                     printf("Vailoate the periodic boundary condition!\n");
                     exit(1);
                 }
+
+                s0 = c[j]->node[flag*size+k].state[0];
+                s1 = c[j]->node[flag*size+k].state[1];
+                if(s0!=s1){
+                    ++ng;
+                }
             }
 
             //chain_print_state(c[j]);
         }
+
+        //printf("average cut in temporal direction (per site) : %.3f\n",((double)ng)/m->nsite);
     }
 
     for(int i=0;i<nsweep;++i){
@@ -496,7 +638,9 @@ int main(int argc, char** argv){
             }
         }
 
-        printf("%d %d\n",Ma,Mb);
+        //printf("%d %d\n",Ma,Mb);
+
+        qlm_measurement(c,m,x,y,lambda);
     }
 
     return 0;

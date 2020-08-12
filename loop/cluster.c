@@ -59,6 +59,7 @@ void claster_update_chain(chain* c, table* t){
 
         if((it->key)==UINT64_MAX){
             c->node[j].key = UINT64_MAX;
+            assert(c->node[j].state[0]==c->node[j].state[1]);
         }
     }
 
@@ -162,7 +163,7 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
             else if(type==5) cluster = cluster_tricut;
             else if(type==6) cluster = cluster_triang;
             else{
-                printf("cluster_clustering : no this type!\n");
+                printf("cluster_clustering : no this type %d !\n",type);
                 exit(1);
             }
 
