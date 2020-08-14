@@ -526,13 +526,32 @@ void qlm_measurement(chain** c, model* m, int x, int y, double lambda){
 
 
 int main(int argc, char** argv){
-    int x = atoi(argv[1]);
-    int y = atoi(argv[2]);
-    double lambda = atof(argv[3]);
-    double beta = atof(argv[4]);
-    int ntherm = atoi(argv[5]);
-    int nsweep = atoi(argv[6]);
-    int seed = atoi(argv[7]);
+    int x;
+    int y;
+    double lambda;
+    double beta;
+    int ntherm;
+    int nsweep;
+    int seed;
+
+    if(argc<7){
+        x = 8;
+        y = 8;
+        lambda = 0.5;
+        beta = 20;
+        ntherm = 100000;
+        nsweep = 100000;
+        seed = 1;
+    }
+    else{
+        x = atoi(argv[1]);
+        y = atoi(argv[2]);
+        lambda = atof(argv[3]);
+        beta = atof(argv[4]);
+        ntherm = atoi(argv[5]);
+        nsweep = atoi(argv[6]);
+        seed = atoi(argv[7]);
+    }
 
     model* m = generate_QLM_2d_triangular(x,y,beta,lambda);
 
@@ -590,7 +609,7 @@ int main(int argc, char** argv){
        c[i]->state = 1;
     }
 
-    table* t = table_alloc(20);
+    table* t = table_alloc(10);
 
     for(int i=0;i<ntherm;++i){
         update_A(c,t,m,x,y,rng);
@@ -619,6 +638,7 @@ int main(int argc, char** argv){
 
             //chain_print_state(c[j]);
         }
+        //table_print_state(t);
 
         //printf("average cut in temporal direction (per site) : %.3f\n",((double)ng)/m->nsite);
     }

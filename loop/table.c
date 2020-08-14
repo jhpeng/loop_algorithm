@@ -115,7 +115,7 @@ void table_print_state(table* t){
 
             for(int j=0;j<2*nspin;++j){
                 printf(" %" PRIu64 " ",t->list[i].link_key[j]);
-                printf(" %d ",t->list[i].link_spin[j]);
+                printf(" %d ",t->list[i].state[j]);
             }
 
             printf("\n");

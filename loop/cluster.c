@@ -135,9 +135,14 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
     assert(t->list[item_id].key!=UINT64_MAX);
 
     if(cluster_size==0){
-        cluster_size = 10000000;
+        cluster_size = t->size*NSPIN_MAX*2;
         cluster_key  = (uint64_t*)malloc(sizeof(uint64_t)*cluster_size);
         cluster_spin = (int*)malloc(sizeof(int)*cluster_size);
+    }
+    else if(cluster_size<t->size*NSPIN_MAX*2){
+        cluster_size = t->size*NSPIN_MAX*2;
+        cluster_key  = (uint64_t*)realloc(cluster_key,sizeof(uint64_t)*cluster_size);
+        cluster_spin = (int*)realloc(cluster_spin,sizeof(int)*cluster_size);
     }
 
     int nspin_max2 = 2*NSPIN_MAX;
