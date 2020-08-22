@@ -201,8 +201,9 @@ void insert_triangular_cut_graph(chain** c, table* t, double w, double beta, gsl
 
         if(check){
             insert_tau[m] = tau;
-            for(i=0;i<4;++i)
+            for(i=0;i<4;++i){
                 insert_state[i*size+m] = chain_state[i*size+n[i]];
+            }
             ++m;
         }
     }
@@ -210,7 +211,7 @@ void insert_triangular_cut_graph(chain** c, table* t, double w, double beta, gsl
     // check memory space and buffer
     while(2*(m+t->n)>(t->size)) table_realloc(t);
     for(i=0;i<4;++i){
-        if(2*(m+c[i]->n)>(c[i]->size)) chain_realloc(c[i],2*(m+c[i]->n));
+        while(2*(m+c[i]->n)>(c[i]->size)) chain_realloc(c[i],2*(m+c[i]->n));
     }
 
     for(k=0;k<m;++k){
@@ -303,7 +304,7 @@ void insert_triangular_graph(chain** c, table* t, double w, double beta, gsl_rng
     // check memory space and buffer
     while(2*(m+t->n)>(t->size)) table_realloc(t);
     for(i=0;i<3;++i){
-        if(2*(m+c[i]->n)>(c[i]->size)) chain_realloc(c[i],2*(m+c[i]->n));
+        while(2*(m+c[i]->n)>(c[i]->size)) chain_realloc(c[i],2*(m+c[i]->n));
     }
 
     for(k=0;k<m;++k){

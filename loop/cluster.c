@@ -26,6 +26,8 @@ void cluster_update_table(table* t){
 
                 t->list[i].link_spin[j] = -1;
                 t->list[i].link_spin[j+nspin] = -1;
+                t->list[i].link_key[j] = UINT64_MAX;
+                t->list[i].link_key[j+nspin] = UINT64_MAX;
             }
 
             if(check){
@@ -87,6 +89,9 @@ void cluster_link_vertex(chain* c, table* t){
 
             it[0] = table_search_from_key(t,key[0]);
             it[1] = table_search_from_key(t,key[1]);
+
+            assert(it[0]->key!=UINT64_MAX);
+            assert(it[1]->key!=UINT64_MAX);
 
             nspin[0] = it[0]->nspin;
             nspin[1] = it[1]->nspin;

@@ -260,7 +260,7 @@ static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
             s1 = it->link_spin[spin_id+nspin];
 
             if(s0!=-1 || s1!=-1){
-                printf("update_A : sometinh wrong %d %d\n",s0,s1);
+                printf("update_A : someting wrong %d %d\n",s0,s1);
                 exit(1);
             }
         }
@@ -340,7 +340,7 @@ static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
             s1 = it->link_spin[spin_id+nspin];
 
             if(s0!=-1 || s1!=-1){
-                printf("update_B : sometinh wrong %d %d\n",s0,s1);
+                printf("update_B : someting wrong %d %d\n",s0,s1);
                 exit(1);
             }
         }
@@ -361,7 +361,7 @@ model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
     int nbond = 4*x*y;
 
     double w1 = 1.0;
-    double w2 = 0.5*lambda;
+    double w2 = lambda;
 
     int* type = (int*)malloc(sizeof(int)*nbond);
     int* bond2site = (int*)malloc(sizeof(int)*nbond*NSPIN_MAX);
@@ -450,7 +450,7 @@ double* mtau;
 size_t* msite;
 size_t* msort;
 int msize=0;
-void qlm_measurement(chain** c, model* m, int x, int y, double lambda){
+void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, int seed){
     int xy = m->nsite/2;
     int i,j,n,size,flag,s0,s1;
 
@@ -465,7 +465,6 @@ void qlm_measurement(chain** c, model* m, int x, int y, double lambda){
         else Mb+=c[i]->state;
     }
 
-
     if(msize==0){
         msize = size;
         mtau  = (double*)malloc(sizeof(double)*msize);
@@ -477,6 +476,34 @@ void qlm_measurement(chain** c, model* m, int x, int y, double lambda){
         mtau  = (double*)realloc(mtau ,sizeof(double)*msize);
         msite = (size_t*)realloc(msite,sizeof(size_t)*msize);
         msort = (size_t*)realloc(msort,sizeof(size_t)*msize);
+    }
+
+    int t5a = 0;
+    int t5b = 0;
+    int t6a = 0;
+    int t6b = 0;
+    uint64_t key;
+    int spin_id,type;
+    item* it;
+    for(i=0;i<m->nsite;++i){
+        size = c[i]->size;
+        flag = c[i]->flag;
+        for(j=0;j<c[i]->n;++j){
+            spin_id = c[i]->node[size*flag+j].spin_id;
+            key = c[i]->node[size*flag+j].key;
+            if(spin_id==0 && key!=UINT64_MAX){
+                it = table_search_from_key(t,key);
+                type = it->type;
+
+                if(type==6 && i<xy) ++t6a;
+                if(type==6 && i>=xy) ++t6b;
+            }
+
+            if(spin_id==3 && key!=UINT64_MAX){
+                if(i<xy) ++t5a;
+                if(i>=xy) ++t5b;
+            }
+        }
     }
 
     n=0;
@@ -512,13 +539,13 @@ void qlm_measurement(chain** c, model* m, int x, int y, double lambda){
         Mb2 += Mb*Mb;
     }
 
-    Ma2 = Ma2/n*2;
-    Mb2 = Mb2/n*2;
+    Ma2 = Ma2/n;
+    Mb2 = Mb2/n;
 
     char fname[128];
-    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f.txt",x,y,m->beta,lambda);
+    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,m->beta,lambda,seed);
     FILE* myfile = fopen(fname,"a");
-    fprintf(myfile,"%d %d %.10e %.10e\n",Ma,Mb,Ma2,Mb2);
+    fprintf(myfile,"%d %d %.10e %.10e %d\n",Ma,Mb,Ma2,Mb2,n);
     fclose(myfile);
 
     free(sigma);
@@ -539,7 +566,7 @@ int main(int argc, char** argv){
         y = 8;
         lambda = 0.5;
         beta = 20;
-        ntherm = 100000;
+        ntherm = 0;
         nsweep = 100000;
         seed = 1;
     }
@@ -646,6 +673,8 @@ int main(int argc, char** argv){
     for(int i=0;i<nsweep;++i){
         update_A(c,t,m,x,y,rng);
         update_B(c,t,m,x,y,rng);
+        //update_A(c,t,m,x,y,rng);
+        //update_B(c,t,m,x,y,rng);
 
         int Ma=0;
         int Mb=0;
@@ -660,7 +689,7 @@ int main(int argc, char** argv){
 
         //printf("%d %d\n",Ma,Mb);
 
-        qlm_measurement(c,m,x,y,lambda);
+        qlm_measurement(c,t,m,x,y,lambda,seed);
     }
 
     return 0;
