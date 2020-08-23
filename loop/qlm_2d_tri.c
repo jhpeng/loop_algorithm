@@ -631,10 +631,19 @@ int main(int argc, char** argv){
     gsl_rng_set(rng,seed);
 
     chain* c[m->nsite];
-    for(int i=0;i<m->nsite;++i){
+    double dis = gsl_rng_uniform_pos(rng);
+    for(int i=0;i<x*y;++i){
        c[i] = chain_alloc(2000);
-       c[i]->state = 1;
+       if(dis<0.5) c[i]->state = 1;
+       else c[i]->state = -1;
     }
+    dis = gsl_rng_uniform_pos(rng);
+    for(int i=x*y;i<2*x*y;++i){
+       c[i] = chain_alloc(2000);
+       if(dis<0.5) c[i]->state = 1;
+       else c[i]->state = -1;
+    }
+
 
     table* t = table_alloc(10);
 
