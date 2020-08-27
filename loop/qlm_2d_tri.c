@@ -1,5 +1,9 @@
 #include "qlm_2d_tri.h"
 
+#if 1
+#define gauss_law
+#endif
+
 static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
     int ai,aj,ak,bi,bj,bk;
     int block_id;
@@ -235,7 +239,9 @@ static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
         insert_triangular_graph(c_temp,t,weight,beta,rng);
     }
 
+#ifdef gauss_law
     gauss_law_A(c,t,m,x,y);
+#endif
 
     for(i=0;i<nsq;++i)
         cluster_link_vertex(c[i],t);
@@ -315,7 +321,9 @@ static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
         insert_triangular_graph(c_temp,t,weight,beta,rng);
     }
 
+#ifdef gauss_law
     gauss_law_B(c,t,m,x,y);
+#endif
 
     for(i=nsq;i<2*nsq;++i)
         cluster_link_vertex(c[i],t);
@@ -451,7 +459,7 @@ size_t* msite;
 size_t* msort;
 int msize=0;
 void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, int seed){
-    int xy = m->nsite/2;
+    int xy = x*y;
     int i,j,n,size,flag,s0,s1;
 
     int* sigma = (int*)malloc(sizeof(int)*m->nsite);
@@ -508,10 +516,10 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
 
     n=0;
     for(i=0;i<m->nsite;++i){
-        for(j=0;c[i]->n>j;++j){
-            size = c[i]->size;
-            flag = c[i]->flag;
+        size = c[i]->size;
+        flag = c[i]->flag;
 
+        for(j=0;j<c[i]->n;++j){
             s0 = c[i]->node[flag*size+j].state[0];
             s1 = c[i]->node[flag*size+j].state[1];
             if(s0!=s1){
@@ -526,6 +534,7 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
 
     double Ma2=0;
     double Mb2=0;
+#if 0
     for(j=0;j<n;++j){
         i = msort[j];
         if(msite[i]<xy)
@@ -535,15 +544,23 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
 
         sigma[msite[i]] *= -1;
 
-        Ma2 += Ma*Ma;
-        Mb2 += Mb*Mb;
+        Ma2 += (double)Ma*(double)Ma;
+        Mb2 += (double)Mb*(double)Mb;
     }
+#endif 
 
-    Ma2 = Ma2/n;
-    Mb2 = Mb2/n;
+    Ma2 = (double)Ma*(double)Ma;
+    Mb2 = (double)Mb*(double)Mb;
 
     char fname[128];
+
+#ifdef gauss_law
     sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,m->beta,lambda,seed);
+#endif
+
+#ifndef gauss_law
+    sprintf(fname,"data/qlmngl_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,m->beta,lambda,seed);
+#endif
     FILE* myfile = fopen(fname,"a");
     fprintf(myfile,"%d %d %.10e %.10e %d\n",Ma,Mb,Ma2,Mb2,n);
     fclose(myfile);
@@ -581,6 +598,7 @@ int main(int argc, char** argv){
     }
 
     model* m = generate_QLM_2d_triangular(x,y,beta,lambda);
+
 
     if(0){
     int site[4];
@@ -646,6 +664,23 @@ int main(int argc, char** argv){
 
 
     table* t = table_alloc(10);
+
+    int quick_thermalize=1;
+    int nq = 5;
+    if( quick_thermalize){
+        model mq[nq];
+        for(int i=0;i<nq;++i){
+            mq[i] = *m;
+            for(int j=0;j<i;++j) (mq[i]).beta *= 0.5;
+        }
+
+        for(int i=0;i<nq;++i){
+            for(int j=0;j<ntherm/nq;++j){
+                update_A(c,t,&(mq[nq-i-1]),x,y,rng);
+                update_B(c,t,&(mq[nq-i-1]),x,y,rng);
+            }
+        }
+    }
 
     for(int i=0;i<ntherm;++i){
         update_A(c,t,m,x,y,rng);
