@@ -452,6 +452,113 @@ model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
     return m;
 }
 
+double local_energy_density(chain** c, double lambda, double beta){
+    int state[3];
+    int flag[4];
+    int size[4];
+    int n[3];
+    double tau[3];
+    double tau1=0;
+    double tau2=0;
+
+    int i=0;
+    int j=0;
+    int k=0;
+
+    state[0] = c[0]->state;
+    state[1] = c[1]->state;
+    state[2] = c[2]->state;
+
+    flag[0] = c[0]->flag;
+    flag[1] = c[1]->flag;
+    flag[2] = c[2]->flag;
+
+    size[0] = c[0]->size;
+    size[1] = c[1]->size;
+    size[2] = c[2]->size;
+
+    n[0] = c[0]->n;
+    n[1] = c[1]->n;
+    n[2] = c[2]->n;
+
+    int ref=0;
+    double stau=0;
+    double tau_now=0;
+
+    while(tau_now<beta){
+        if((state[0]==state[1]) && (state[1]==state[2])){
+            if(!ref){
+                ref=1;
+                tau1=tau_now;
+            }
+        }
+        else if(ref){
+            ref=0;
+            tau2=tau_now;
+
+            stau += (tau2-tau1);
+        }
+
+        if(i<n[0]) tau[0] = c[0]->node[size[0]*flag[0]+i].tau;
+        else tau[0]=beta;
+
+        if(j<n[1]) tau[1] = c[1]->node[size[1]*flag[1]+j].tau;
+        else tau[1]=beta;
+
+        if(k<n[2]) tau[2] = c[2]->node[size[2]*flag[2]+k].tau;
+        else tau[2]=beta;
+
+        if(tau[0] < tau[1]){
+            if(tau[0] < tau[2]){
+                tau_now=tau[0];
+                ++i;
+            }
+            else{
+                tau_now=tau[2];
+                ++k;
+            }
+        }
+        else{
+            if(tau[1] < tau[2]){
+                tau_now=tau[1];
+                ++j;
+            }
+            else{
+                tau_now=tau[2];
+                ++k;
+            }
+
+        }
+
+        if(i<n[0]) state[0] = c[0]->node[size[0]*flag[0]+i].state[0];
+        else state[0] = c[0]->state;
+
+        if(j<n[1]) state[1] = c[1]->node[size[1]*flag[1]+j].state[0];
+        else state[1] = c[1]->state;
+
+        if(k<n[2]) state[2] = c[2]->node[size[2]*flag[2]+k].state[0];
+        else state[2] = c[2]->state;
+
+        //printf("%d %d %d (%d %d %d) %.3f %.3f %.3f\n",i,j,k,n[0],n[1],n[2],tau[0],tau[1],tau[2]);
+
+        //assert(!(i>n[0]));
+        //assert(!(j>n[1]));
+        //assert(!(k>n[2]));
+    }
+
+    double nt=0;
+    flag[3] = c[3]->flag;
+    size[3] = c[3]->size;
+    for(i=0;i<c[3]->n;++i){
+        state[0] = c[3]->node[size[3]*flag[3]+i].state[0];
+        state[1] = c[3]->node[size[3]*flag[3]+i].state[1];
+
+        if(state[0]!=state[1]) nt+=1;
+    }
+
+    return lambda*stau/beta+nt/beta;
+}
+
 #include <gsl/gsl_sort.h>
 #include <string.h>
 double* mtau;
@@ -486,33 +593,6 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
         msort = (size_t*)realloc(msort,sizeof(size_t)*msize);
     }
 
-    int t5a = 0;
-    int t5b = 0;
-    int t6a = 0;
-    int t6b = 0;
-    uint64_t key;
-    int spin_id,type;
-    item* it;
-    for(i=0;i<m->nsite;++i){
-        size = c[i]->size;
-        flag = c[i]->flag;
-        for(j=0;j<c[i]->n;++j){
-            spin_id = c[i]->node[size*flag+j].spin_id;
-            key = c[i]->node[size*flag+j].key;
-            if(spin_id==0 && key!=UINT64_MAX){
-                it = table_search_from_key(t,key);
-                type = it->type;
-
-                if(type==6 && i<xy) ++t6a;
-                if(type==6 && i>=xy) ++t6b;
-            }
-
-            if(spin_id==3 && key!=UINT64_MAX){
-                if(i<xy) ++t5a;
-                if(i>=xy) ++t5b;
-            }
-        }
-    }
 
     n=0;
     for(i=0;i<m->nsite;++i){
@@ -552,6 +632,18 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
     Ma2 = (double)Ma*(double)Ma;
     Mb2 = (double)Mb*(double)Mb;
 
+    chain *c_temp[4];
+    double energy=0;
+    for(i=0;i<m->nsite;++i){
+        c_temp[0] = c[m->bond2site[i*NSPIN_MAX+0]];
+        c_temp[1] = c[m->bond2site[i*NSPIN_MAX+1]];
+        c_temp[2] = c[m->bond2site[i*NSPIN_MAX+2]];
+        c_temp[3] = c[m->bond2site[i*NSPIN_MAX+3]];
+
+        energy+=local_energy_density(c_temp,lambda, m->beta);
+    }
+    energy = energy/m->nsite;
+
     char fname[128];
 
 #ifdef gauss_law
@@ -562,7 +654,7 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
     sprintf(fname,"data/qlmngl_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,m->beta,lambda,seed);
 #endif
     FILE* myfile = fopen(fname,"a");
-    fprintf(myfile,"%d %d %.10e %.10e %d\n",Ma,Mb,Ma2,Mb2,n);
+    fprintf(myfile,"%d %d %.10e %.10e %d %.10e\n",Ma,Mb,Ma2,Mb2,n,energy);
     fclose(myfile);
 
     free(sigma);
@@ -581,10 +673,10 @@ int main(int argc, char** argv){
     if(argc<7){
         x = 8;
         y = 8;
-        lambda = 0.5;
-        beta = 20;
-        ntherm = 0;
-        nsweep = 100000;
+        lambda = 1.0;
+        beta = 10;
+        ntherm = 1000;
+        nsweep = 1000;
         seed = 1;
     }
     else{
