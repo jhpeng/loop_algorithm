@@ -457,21 +457,31 @@ double local_energy_density_fast(chain** c, double lambda, double beta){
     int flag = c[3]->flag;
     int spin_id;
 
-    int s0,s1;
+    int i,s0,s1;
 
-    double N=0;
+    double N5=0;
     double nt=0;
-    for(int i=0;i<c[3]->n;++i){
+    for(i=0;i<c[3]->n;++i){
         spin_id = c[3]->node[flag*size+i].spin_id;
         if(spin_id==3){
-            N += 1;
+            N5+=1;
             s0 = c[3]->node[flag*size+i].state[0];
             s1 = c[3]->node[flag*size+i].state[1];
             if(s0!=s1) nt+=1;
         }
     }
+
+    double N6=0;
+    size = c[0]->size;
+    flag = c[0]->flag;
+    for(i=0;i<c[0]->n;++i){
+        spin_id = c[0]->node[flag*size+i].spin_id;
+        if(spin_id==0) N6+=1;
+    }
     
-    return lambda*N/beta+nt/beta;
+    N6=N6-N5;
+
+    return N6/beta+nt/beta;
 }
 
 double local_energy_density(chain** c, double lambda, double beta){
