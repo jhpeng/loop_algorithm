@@ -452,6 +452,28 @@ model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
     return m;
 }
 
+double local_energy_density_fast(chain** c, double lambda, double beta){
+    int size = c[3]->size;
+    int flag = c[3]->flag;
+    int spin_id;
+
+    int s0,s1;
+
+    double N=0;
+    double nt=0;
+    for(int i=0;i<c[3]->n;++i){
+        spin_id = c[3]->node[flag*size+i].spin_id;
+        if(spin_id==3){
+            N += 1;
+            s0 = c[3]->node[flag*size+i].state[0];
+            s1 = c[3]->node[flag*size+i].state[1];
+            if(s0!=s1) nt+=1;
+        }
+    }
+    
+    return lambda*N/beta+nt/beta;
+}
+
 double local_energy_density(chain** c, double lambda, double beta){
     int state[3];
     int flag[4];
@@ -486,13 +508,16 @@ double local_energy_density(chain** c, double lambda, double beta){
     double tau_now=0;
 
     while(tau_now<beta){
+        //printf("%d %d %d (%d %d %d) %.3f %.3f %.3f (%d %d %d)\n",i,j,k,n[0],n[1],n[2],tau[0],tau[1],tau[2],state[0],state[1],state[2]);
         if((state[0]==state[1]) && (state[1]==state[2])){
             if(!ref){
+                printf("start!\n");
                 ref=1;
                 tau1=tau_now;
             }
         }
         else if(ref){
+            printf("end!\n");
             ref=0;
             tau2=tau_now;
 
@@ -539,7 +564,6 @@ double local_energy_density(chain** c, double lambda, double beta){
         if(k<n[2]) state[2] = c[2]->node[size[2]*flag[2]+k].state[0];
         else state[2] = c[2]->state;
 
-        //printf("%d %d %d (%d %d %d) %.3f %.3f %.3f\n",i,j,k,n[0],n[1],n[2],tau[0],tau[1],tau[2]);
 
         //assert(!(i>n[0]));
         //assert(!(j>n[1]));
@@ -640,7 +664,7 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
         c_temp[2] = c[m->bond2site[i*NSPIN_MAX+2]];
         c_temp[3] = c[m->bond2site[i*NSPIN_MAX+3]];
 
-        energy+=local_energy_density(c_temp,lambda, m->beta);
+        energy+=local_energy_density_fast(c_temp,lambda, m->beta);
     }
     energy = energy/m->nsite;
 
