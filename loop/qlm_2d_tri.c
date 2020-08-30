@@ -9,6 +9,63 @@ int msize=0;
 #define gauss_law
 #endif
 
+static int highvar2charge(int* h){
+    int charge=0;
+
+    if(h[0]==h[1]) charge+=1;
+    else charge-=1;
+    if(h[2]==h[3]) charge+=1;
+    else charge-=1;
+    if(h[4]==h[5]) charge+=1;
+    else charge-=1;
+    if(h[1]==h[2]) charge-=1;
+    else charge+=1;
+    if(h[3]==h[4]) charge-=1;
+    else charge+=1;
+    if(h[5]==h[0]) charge-=1;
+    else charge+=1;
+
+    return charge;
+}
+
+void counting_charge(int* state, int x, int y){
+    int ai,aj,ak,bi,bj,bk;
+    int block_id;
+    int ix,iy,i;
+
+    int h[6];
+    int charge;
+
+
+    for(block_id=0;block_id<x*y;++block_id){
+        ix = block_id%x;
+        iy = block_id/x;
+
+        ai = iy*x+ix;
+        aj = ((iy+1)%y)*x+ix;
+        ak = ((iy+1)%y)*x+(ix+1)%x;
+
+        bi = iy*x+ix               + x*y;
+        bj = iy*x+(ix+1)%x         + x*y;
+        bk = ((iy+1)%y)*x+(ix+1)%x + x*y;
+
+
+
+        h[0] = state[ai];
+        h[1] = state[bi];
+        h[2] = state[aj];
+        h[3] = state[bk];
+        h[4] = state[ak];
+        h[5] = state[bj];
+
+        charge = highvar2charge(h);
+
+        for(i=0;i<6;++i) h[i] = (h[i]+1)/2;
+        if(charge!=0)
+            printf("(%d %d %d %d %d %d) %d\n",h[0],h[1],h[2],h[3],h[4],h[5],charge);
+    }
+}
+
 static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
     int ai,aj,ak,bi,bj,bk;
     int block_id;
@@ -251,40 +308,19 @@ static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     for(i=0;i<nsq;++i)
         cluster_link_vertex(c[i],t);
 
-#if 0
-    int s0,s1,nspin,spin_id,size,flag;
-    uint64_t key;
-    item* it;
-    chain* ct;
-    for(i=0;i<nsq;++i){
-        ct = c[i+nsq];
-        for(j=0;j<ct->n;++j){
-            size = ct->size;
-            flag = ct->flag;
-            key     = ct->node[size*flag+j].key;
-            spin_id = ct->node[size*flag+j].spin_id;
-
-            it = table_search_from_key(t,key);
-            nspin = it->nspin;
-
-            s0 = it->link_spin[spin_id      ];
-            s1 = it->link_spin[spin_id+nspin];
-
-            if(s0!=-1 || s1!=-1){
-                printf("update_A : someting wrong %d %d\n",s0,s1);
-                exit(1);
-            }
-        }
-    }
-#endif
-
     cluster_traverse(t,rng);
 
     cluster_update_table(t);
 
-    //for(i=0;i<nsq;++i)
     for(i=0;i<2*nsq;++i)
         claster_update_chain(c[i],t);
+
+    for(i=0;i<nsq;++i){
+        if(c[i]->n==0){
+            if(gsl_rng_uniform_pos(rng)<0.5)
+                c[i]->state *= -1;
+        }
+    }
 }
 
 static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
@@ -333,33 +369,6 @@ static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     for(i=nsq;i<2*nsq;++i)
         cluster_link_vertex(c[i],t);
 
-#if 0
-    int s0,s1,nspin,spin_id,size,flag;
-    uint64_t key;
-    item* it;
-    chain* ct;
-    for(i=0;i<nsq;++i){
-        ct = c[i];
-        for(j=0;j<ct->n;++j){
-            size = ct->size;
-            flag = ct->flag;
-            key     = ct->node[size*flag+j].key;
-            spin_id = ct->node[size*flag+j].spin_id;
-
-            it = table_search_from_key(t,key);
-            nspin = it->nspin;
-
-            s0 = it->link_spin[spin_id      ];
-            s1 = it->link_spin[spin_id+nspin];
-
-            if(s0!=-1 || s1!=-1){
-                printf("update_B : someting wrong %d %d\n",s0,s1);
-                exit(1);
-            }
-        }
-    }
-#endif
-
     cluster_traverse(t,rng);
 
     cluster_update_table(t);
@@ -367,6 +376,13 @@ static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     //for(i=nsq;i<2*nsq;++i)
     for(i=0;i<2*nsq;++i)
         claster_update_chain(c[i],t);
+
+    for(i=nsq;i<2*nsq;++i){
+        if(c[i]->n==0){
+            if(gsl_rng_uniform_pos(rng)<0.5)
+                c[i]->state *= -1;
+        }
+    }
 }
 
 model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
@@ -639,9 +655,9 @@ int main(int argc, char** argv){
         x = 8;
         y = 8;
         lambda = 1.0;
-        beta = 10;
-        ntherm = 1000;
-        nsweep = 1000;
+        beta = 4;
+        ntherm = 2000;
+        nsweep = 0;
         seed = 1;
     }
     else{
@@ -655,52 +671,6 @@ int main(int argc, char** argv){
     }
 
     model* m = generate_QLM_2d_triangular(x,y,beta,lambda);
-
-
-    if(0){
-    int site[4];
-    for(int i=0;i<m->nbond/2;++i){
-        site[0] = m->bond2site[i*NSPIN_MAX+0];
-        site[1] = m->bond2site[i*NSPIN_MAX+1];
-        site[2] = m->bond2site[i*NSPIN_MAX+2];
-        site[3] = m->bond2site[i*NSPIN_MAX+3];
-
-        printf("bond_id=%d \t",i);
-        for(int j=0;j<4;++j){
-            if(!(site[j]<x*y)){
-                site[j] -= x*y;
-                printf("B %d  ",site[j]);
-            }
-            else{
-                printf("A %d  ",site[j]);
-            }
-        }
-        int type = m->type[i];
-        double weight = m->weight[i];
-        printf("%d %.3f",type,weight);
-        printf("\n");
-    }
-    for(int i=m->nbond/2;i<m->nbond;++i){
-        site[0] = m->bond2site[i*NSPIN_MAX+0];
-        site[1] = m->bond2site[i*NSPIN_MAX+1];
-        site[2] = m->bond2site[i*NSPIN_MAX+2];
-
-        printf("bond_id=%d \t",i);
-        for(int j=0;j<3;++j){
-            if(!(site[j]<x*y)){
-                site[j] -= x*y;
-                printf("B %d  ",site[j]);
-            }
-            else{
-                printf("A %d  ",site[j]);
-            }
-        }
-        int type = m->type[i];
-        double weight = m->weight[i];
-        printf("%d %.3f",type,weight);
-        printf("\n");
-    }
-    }
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
@@ -718,7 +688,6 @@ int main(int argc, char** argv){
        if(dis<0.5) c[i]->state = 1;
        else c[i]->state = -1;
     }
-
 
     table* t = table_alloc(10);
 
@@ -739,6 +708,7 @@ int main(int argc, char** argv){
         }
     }
 
+    int* state = (int*)malloc(sizeof(int)*x*y*2);
     for(int i=0;i<ntherm;++i){
         update_A(c,t,m,x,y,rng);
         update_B(c,t,m,x,y,rng);
@@ -764,18 +734,18 @@ int main(int argc, char** argv){
                 }
             }
 
-            //chain_print_state(c[j]);
         }
-        //table_print_state(t);
 
-        //printf("average cut in temporal direction (per site) : %.3f\n",((double)ng)/m->nsite);
+        for(int site_id=0;site_id<m->nsite;++site_id){
+            state[site_id] = c[site_id]->state;
+        }
+        counting_charge(state,x,y);
     }
+    free(state);
 
     for(int i=0;i<nsweep;++i){
         update_A(c,t,m,x,y,rng);
         update_B(c,t,m,x,y,rng);
-        //update_A(c,t,m,x,y,rng);
-        //update_B(c,t,m,x,y,rng);
 
         int Ma=0;
         int Mb=0;
@@ -787,8 +757,6 @@ int main(int argc, char** argv){
                 Mb += c[iy*x+ix+x*y]->state;
             }
         }
-
-        //printf("%d %d\n",Ma,Mb);
 
         qlm_measurement(c,t,m,x,y,lambda,seed);
     }
