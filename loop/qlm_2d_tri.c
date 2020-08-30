@@ -525,7 +525,6 @@ double local_energy_density(chain** c, double lambda, double beta){
                 ref=1;
             }
         }
-
     }
 
     if(ref){
@@ -546,7 +545,7 @@ double local_energy_density(chain** c, double lambda, double beta){
     return lambda*stau/beta+n/beta;
 }
 
-void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, int seed){
+void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, int seed, char* fname){
     int xy = x*y;
     int i,j,n,size,flag,s0,s1;
 
@@ -625,15 +624,6 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
     }
     energy = energy/m->nsite;
 
-    char fname[128];
-
-#ifdef gauss_law
-    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,m->beta,lambda,seed);
-#endif
-
-#ifndef gauss_law
-    sprintf(fname,"data/qlmngl_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,m->beta,lambda,seed);
-#endif
     FILE* myfile = fopen(fname,"a");
     fprintf(myfile,"%d %d %.10e %.10e %d %.10e\n",Ma,Mb,Ma2,Mb2,n,energy);
     fclose(myfile);
@@ -650,8 +640,9 @@ int main(int argc, char** argv){
     int ntherm;
     int nsweep;
     int seed;
+    char fname[128];
 
-    if(argc<7){
+    if(argc==0){
         x = 8;
         y = 8;
         lambda = 1.0;
@@ -669,6 +660,14 @@ int main(int argc, char** argv){
         nsweep = atoi(argv[6]);
         seed = atoi(argv[7]);
     }
+
+    printf("%d\n",argc);
+    if(argc<9){
+        sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,beta,lambda,seed);
+    }
+     else{
+         strcpy(fname,argv[8]);
+     }
 
     model* m = generate_QLM_2d_triangular(x,y,beta,lambda);
 
@@ -758,7 +757,7 @@ int main(int argc, char** argv){
             }
         }
 
-        qlm_measurement(c,t,m,x,y,lambda,seed);
+        qlm_measurement(c,t,m,x,y,lambda,seed,fname);
     }
 
     return 0;
