@@ -40,7 +40,7 @@ void cluster_update_table(table* t){
     t->n = n;
 }
 
-void claster_update_chain(chain* c, table* t){
+void cluster_update_chain(chain* c, table* t){
     int i,j,spin_id,nspin;
     uint64_t key;
 

@@ -313,7 +313,7 @@ static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     cluster_update_table(t);
 
     for(i=0;i<2*nsq;++i)
-        claster_update_chain(c[i],t);
+        cluster_update_chain(c[i],t);
 
     for(i=0;i<nsq;++i){
         if(c[i]->n==0){
@@ -375,7 +375,7 @@ static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
 
     //for(i=nsq;i<2*nsq;++i)
     for(i=0;i<2*nsq;++i)
-        claster_update_chain(c[i],t);
+        cluster_update_chain(c[i],t);
 
     for(i=nsq;i<2*nsq;++i){
         if(c[i]->n==0){
