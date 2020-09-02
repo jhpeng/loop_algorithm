@@ -542,7 +542,7 @@ double local_energy_density(chain** c, double lambda, double beta){
         }
     }
 
-    return lambda*stau/beta+n/beta;
+    return lambda*stau/beta+(double)n/beta;
 }
 
 void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, int seed, char* fname){
@@ -583,8 +583,10 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
             s0 = c[i]->node[flag*size+j].state[0];
             s1 = c[i]->node[flag*size+j].state[1];
             if(s0!=s1){
+                uint64_t key = c[i]->node[flag*size+j].key;
                 mtau[n]  = c[i]->node[flag*size+j].tau;
                 msite[n] = (size_t)i;
+                //printf("%d %.3f %" PRIu64 " %d %d %d %.3f %d %d\n",n,mtau[n],key,i,s0,s1,m->beta,flag,size);
                 ++n;
             }
         }
@@ -631,6 +633,34 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
     free(sigma);
 }
 
+void qlm_check_ref_conf(table* t){
+    int size = t->size;
+    int n = t->n;
+    int count=0;
+    int nspin,type;
+    int* state;
+
+    for(int i=0;i<size;++i){
+        if(t->list[i].key!=UINT64_MAX){
+            type = nspin = t->list[i].type;
+            if(type==5 || type==6){
+                nspin = t->list[i].nspin;
+                state = t->list[i].state;
+
+                if(!((state[0]==state[1]) && (state[1]==state[2]))){
+                    printf("violate the reference configuration!\n");
+                }
+                else if(!((state[0+nspin]==state[1+nspin]) && (state[1+nspin]==state[2+nspin]))){
+                    printf("violate the reference configuration!\n");
+                }
+            }
+            count++;
+        }
+    }
+
+    if((n-count)!=0)
+        printf("missing %d\n",n-count);
+}
 
 int main(int argc, char** argv){
     int x;
@@ -642,13 +672,13 @@ int main(int argc, char** argv){
     int seed;
     char fname[128];
 
-    if(argc==0){
+    if(argc==1){
         x = 8;
         y = 8;
         lambda = 1.0;
-        beta = 4;
-        ntherm = 2000;
-        nsweep = 0;
+        beta = 10;
+        ntherm = 10000;
+        nsweep = 1000;
         seed = 1;
     }
     else{
@@ -661,7 +691,6 @@ int main(int argc, char** argv){
         seed = atoi(argv[7]);
     }
 
-    printf("%d\n",argc);
     if(argc<9){
         sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,beta,lambda,seed);
     }
@@ -690,7 +719,7 @@ int main(int argc, char** argv){
 
     table* t = table_alloc(10);
 
-    int quick_thermalize=1;
+    int quick_thermalize=0;
     int nq = 5;
     if( quick_thermalize){
         model mq[nq];
@@ -722,7 +751,7 @@ int main(int argc, char** argv){
                 int s1 = c[j]->node[flag*size+k].state[1];
 
                 if(s0!=s1){
-                    printf("Vailoate the periodic boundary condition!\n");
+                    printf("Vaiolate the periodic boundary condition!\n");
                     exit(1);
                 }
 
@@ -739,6 +768,7 @@ int main(int argc, char** argv){
             state[site_id] = c[site_id]->state;
         }
         counting_charge(state,x,y);
+        qlm_check_ref_conf(t);
     }
     free(state);
 
