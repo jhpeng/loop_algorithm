@@ -694,7 +694,7 @@ double local_energy_density(chain** c, double lambda, double beta){
 int qlm_block_data_id=0;
 int qlm_block_data_size=1000;
 double* qlm_block_data;
-void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, int seed, char* fname){
+void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, char* fname){
     int xy = x*y;
     int i,j,n,size,flag,s0,s1;
 
@@ -810,6 +810,40 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
     free(sigma);
 }
 
+int energy_map_id;
+double* energy_map_data;
+void qlm_energy_map(chain** c, model* m, int x, int y, double lambda, int nsweep, char* fname){
+    int i;
+    chain* c_temp[4];
+
+    if(energy_map_data==NULL){
+        energy_map_id=0;
+        energy_map_data = (double*)malloc(sizeof(double)*m->nsite);
+        for(i=0;i<m->nsite;++i) energy_map_data[i]=0;
+    }
+
+    energy_map_id++;
+
+    for(i=0;i<m->nsite;++i){
+        c_temp[0] = c[m->bond2site[i*NSPIN_MAX+0]];
+        c_temp[1] = c[m->bond2site[i*NSPIN_MAX+1]];
+        c_temp[2] = c[m->bond2site[i*NSPIN_MAX+2]];
+        c_temp[3] = c[m->bond2site[i*NSPIN_MAX+3]];
+
+        energy_map_data[i]+=local_energy_density(c_temp,lambda, m->beta);
+    }
+
+    if(energy_map_id==nsweep){
+        FILE* myfile = fopen(fname,"w");
+        for(i=0;i<m->nsite;++i){
+            energy_map_data[i] /= (double)nsweep;
+            fprintf(myfile,"%.10e ",energy_map_data[i]);
+        }
+        fprintf(myfile,"\n");
+        fclose(myfile);
+    }
+}
+
 void qlm_check_ref_conf(table* t){
     int size = t->size;
     int n = t->n;
@@ -849,6 +883,7 @@ int main(int argc, char** argv){
     int nsweep;
     int seed;
     char fname[128];
+    char ename[128];
 
     if(argc==1){
         x = 8;
@@ -871,11 +906,14 @@ int main(int argc, char** argv){
         seed = atoi(argv[8]);
     }
 
-    if(argc<10){
-        sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,beta,lambda,seed);
-    }
-     else{
+    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    sprintf(ename,"map/qlm_energy_map_x_%d_y_%d_beta_%.1f_lambda_%.2f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+
+     if(argc>9){
          strcpy(fname,argv[9]);
+     }
+     else if(argc>10){
+         strcpy(ename,argv[10]);
      }
 
     model* m = generate_QLM_2d_triangular(x,y,beta,lambda);
@@ -988,7 +1026,8 @@ int main(int argc, char** argv){
             }
         }
 
-        qlm_measurement(c,t,m,x,y,lambda,seed,fname);
+        qlm_measurement(c,t,m,x,y,lambda,fname);
+        qlm_energy_map(c,m,x,y,lambda,nsweep,ename);
     }
 
     return 0;
