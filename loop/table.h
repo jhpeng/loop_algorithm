@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <inttypes.h>
+
+#define NDEBUG
 #include <assert.h>
 
 #define NSPIN_MAX 4
