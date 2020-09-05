@@ -104,6 +104,7 @@ void cluster_link_vertex(chain* c, table* t){
     }
 }
 
+//type : 3 (frozen)
 //type : 4
 //triangular cut graph
 static int cluster_twolink[16] = {0,1,2,3,
@@ -164,12 +165,17 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
 
         int n=0;
         int m=0;
+        int frozen=0;
         while(m<=n){
             type  = t->list[item_id].type;
             nspin = t->list[item_id].nspin;
 
 
-            if(type==4) cluster = cluster_twolink;
+            if(type==3) {
+                cluster = cluster_twolink;
+                frozen=1;
+            }
+            else if(type==4) cluster = cluster_twolink;
             else if(type==5) cluster = cluster_tricut;
             else if(type==6) cluster = cluster_triang;
             else{
@@ -207,6 +213,13 @@ static void cluster_clustering(table* t, int item_id, int spin_id, gsl_rng* rng)
 
             if(check)
                 break;
+        }
+
+        if(frozen && flag==2){
+            for(i=0;i<m;++i){
+                item_id = table_hash(t,cluster_key[i]);
+                t->list[item_id].link_spin[cluster_spin[i]] -= nspin_max2;
+            }
         }
     }
 }
