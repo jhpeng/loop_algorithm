@@ -28,7 +28,39 @@ static int highvar2charge(int* h){
     return charge;
 }
 
-void counting_charge(int* state, int x, int y){
+static double highvar2Xflux(int* h){
+    double xflux=0.0;
+    double factor=0.70710678118;
+
+    if(h[0]==h[1]) xflux-=factor;
+    else xflux+=factor;
+    if(h[1]==h[2]) xflux+=1.0;
+    else xflux-=1.0;
+    if(h[3]==h[4]) xflux-=factor;
+    else xflux+=factor;
+    if(h[4]==h[5]) xflux+=1.0;
+    else xflux-=1.0;
+
+    return xflux;
+}
+
+static double highvar2Yflux(int* h){
+    double yflux=0.0;
+    double factor=0.70710678118;
+
+    if(h[0]==h[1]) yflux-=factor;
+    else yflux+=factor;
+    if(h[2]==h[3]) yflux+=1.0;
+    else yflux-=1.0;
+    if(h[3]==h[4]) yflux-=factor;
+    else yflux+=factor;
+    if(h[5]==h[0]) yflux+=1.0;
+    else yflux-=1.0;
+
+    return yflux;
+}
+
+void counting_charge(int* state, int x, int y, int distance){
     int ai,aj,ak,bi,bj,bk;
     int block_id;
     int ix,iy,i;
@@ -37,6 +69,7 @@ void counting_charge(int* state, int x, int y){
     int charge;
 
 
+    printf("---------------- counting charge ------------------\n");
     for(block_id=0;block_id<x*y;++block_id){
         ix = block_id%x;
         iy = block_id/x;
@@ -49,8 +82,6 @@ void counting_charge(int* state, int x, int y){
         bj = iy*x+(ix+1)%x         + x*y;
         bk = ((iy+1)%y)*x+(ix+1)%x + x*y;
 
-
-
         h[0] = state[ai];
         h[1] = state[bi];
         h[2] = state[aj];
@@ -60,10 +91,99 @@ void counting_charge(int* state, int x, int y){
 
         charge = highvar2charge(h);
 
+        //if(block_id%x==x-1) printf("%d\n",charge);
+        //else if(charge>=0) printf("%d  ",charge);
+        //else printf("%d ",charge);
+
+
         for(i=0;i<6;++i) h[i] = (h[i]+1)/2;
         if(charge!=0)
-            printf("(%d %d %d %d %d %d) %d\n",h[0],h[1],h[2],h[3],h[4],h[5],charge);
+            printf("block_id=%d state=(%d %d %d %d %d %d) charge=%d\n",block_id,h[0],h[1],h[2],h[3],h[4],h[5],charge);
     }
+}
+
+void print_charge(int* state, int x, int y){
+    int ai,aj,ak,bi,bj,bk;
+    int block_id;
+    int ix,iy;
+
+    int h[6];
+    int charge;
+    double xflux,yflux;
+
+
+    printf("---------------- printing charge ------------------\n");
+    for(block_id=0;block_id<x*y;++block_id){
+        ix = block_id%x;
+        iy = block_id/x;
+
+        ai = iy*x+ix;
+        aj = ((iy+1)%y)*x+ix;
+        ak = ((iy+1)%y)*x+(ix+1)%x;
+
+        bi = iy*x+ix               + x*y;
+        bj = iy*x+(ix+1)%x         + x*y;
+        bk = ((iy+1)%y)*x+(ix+1)%x + x*y;
+
+        h[0] = state[ai];
+        h[1] = state[bi];
+        h[2] = state[aj];
+        h[3] = state[bk];
+        h[4] = state[ak];
+        h[5] = state[bj];
+
+        charge = highvar2charge(h);
+        xflux  = highvar2Xflux(h);
+        yflux  = highvar2Yflux(h);
+
+        if(charge>0) printf("+ ");
+        else if(charge<0) printf("- ");
+        else {
+            if(yflux==0){
+                if(xflux>0) printf("> ");
+                else if(xflux<0) printf("< ");
+                else printf("  ");
+            }
+            else if(xflux==0) {
+                if(yflux>0) printf("v ");
+                else if(yflux<0)printf("^ ");
+                else printf("  ");
+            }
+            else if(xflux*yflux>0) printf("%c ",(char)32);
+            else if(xflux*yflux<0) printf("%c ",(char)32);
+        }
+
+        if(block_id%x==x-1) printf("\n");
+    }
+}
+
+void initial_state_with_charge(int* state, int x, int y, int distance){
+    int ak,bj;
+    int ix,iy;
+
+    if(distance > x/2){
+        printf("initial_state_with_charge : the distance can not larger than x/2!\n");
+        exit(1);
+    }
+
+    for(iy=0;iy<y;iy++){
+        for(ix=0;ix<x;ix++){
+            state[iy*x+ix]     = 1;
+            state[iy*x+ix+x*y] = 1;
+        }
+    }
+
+    iy = y/2;
+    for(ix=(x-distance)/2;ix<(x+distance)/2;ix++){
+        ak = ((iy+1)%y)*x+(ix+1)%x;
+
+        bj = iy*x+(ix+1)%x         + x*y;
+
+        state[ak] = -1;
+        state[bj] = -1;
+    }
+
+    counting_charge(state,x,y,distance);
 }
 
 static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
@@ -78,6 +198,8 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
 
     int ix,iy;
     int sb[3];
+    int h[6];
+    int charge,type;
     uint64_t key;
     item* it;
     for(block_id=0;block_id<x*y;++block_id){
@@ -96,6 +218,17 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
         sb[1] = c[bj]->state;
         sb[2] = c[bk]->state;
 
+        h[0] = c[ai]->state;
+        h[1] = c[bi]->state;
+        h[2] = c[aj]->state;
+        h[3] = c[bk]->state;
+        h[4] = c[ak]->state;
+        h[5] = c[bj]->state;
+
+        charge=highvar2charge(h);
+        type=4;
+        if(charge!=0) type=3;
+
         if(!((sb[0]==sb[1]) && (sb[1]==sb[2]))){
             if(sb[0]==sb[1]){
                 key = table_generate_key(t);
@@ -104,11 +237,11 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
 
                 it = table_search_from_key(t,key);
                 it->key   = key;
-                it->type  = 4;
+                it->type  = type;
                 it->nspin = 2;
                 it->state[0] = c[aj]->state;
-                it->state[1] = c[aj]->state;
-                it->state[2] = c[ak]->state;
+                it->state[2] = c[aj]->state;
+                it->state[1] = c[ak]->state;
                 it->state[3] = c[ak]->state;
 
                 for(int j=0;j<4;++j){
@@ -125,11 +258,11 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
 
                 it = table_search_from_key(t,key);
                 it->key   = key;
-                it->type  = 4;
+                it->type  = type;
                 it->nspin = 2;
                 it->state[0] = c[ai]->state;
-                it->state[1] = c[ai]->state;
-                it->state[2] = c[aj]->state;
+                it->state[2] = c[ai]->state;
+                it->state[1] = c[aj]->state;
                 it->state[3] = c[aj]->state;
 
                 for(int j=0;j<4;++j){
@@ -146,11 +279,11 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
 
                 it = table_search_from_key(t,key);
                 it->key   = key;
-                it->type  = 4;
+                it->type  = type;
                 it->nspin = 2;
                 it->state[0] = c[ai]->state;
-                it->state[1] = c[ai]->state;
-                it->state[2] = c[ak]->state;
+                it->state[2] = c[ai]->state;
+                it->state[1] = c[ak]->state;
                 it->state[3] = c[ak]->state;
 
                 for(int j=0;j<4;++j){
@@ -176,6 +309,8 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
 
     int ix,iy;
     int sa[3];
+    int h[6];
+    int charge,type;
     uint64_t key;
     item* it;
     for(block_id=0;block_id<x*y;++block_id){
@@ -194,6 +329,17 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
         sa[1] = c[aj]->state;
         sa[2] = c[ak]->state;
 
+        h[0] = c[ai]->state;
+        h[1] = c[bi]->state;
+        h[2] = c[aj]->state;
+        h[3] = c[bk]->state;
+        h[4] = c[ak]->state;
+        h[5] = c[bj]->state;
+
+        charge=highvar2charge(h);
+        type=4;
+        if(charge!=0) type=3;
+
         if(!((sa[0]==sa[1]) && (sa[1]==sa[2]))){
             if(sa[0]==sa[1]){
                 key = table_generate_key(t);
@@ -202,11 +348,11 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
 
                 it = table_search_from_key(t,key);
                 it->key   = key;
-                it->type  = 4;
+                it->type  = type;
                 it->nspin = 2;
                 it->state[0] = c[bj]->state;
-                it->state[1] = c[bj]->state;
-                it->state[2] = c[bk]->state;
+                it->state[2] = c[bj]->state;
+                it->state[1] = c[bk]->state;
                 it->state[3] = c[bk]->state;
 
                 for(int j=0;j<4;++j){
@@ -223,11 +369,11 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
 
                 it = table_search_from_key(t,key);
                 it->key   = key;
-                it->type  = 4;
+                it->type  = type;
                 it->nspin = 2;
                 it->state[0] = c[bi]->state;
-                it->state[1] = c[bi]->state;
-                it->state[2] = c[bj]->state;
+                it->state[2] = c[bi]->state;
+                it->state[1] = c[bj]->state;
                 it->state[3] = c[bj]->state;
 
                 for(int j=0;j<4;++j){
@@ -244,11 +390,11 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
 
                 it = table_search_from_key(t,key);
                 it->key   = key;
-                it->type  = 4;
+                it->type  = type;
                 it->nspin = 2;
                 it->state[0] = c[bi]->state;
-                it->state[1] = c[bi]->state;
-                it->state[2] = c[bk]->state;
+                it->state[2] = c[bi]->state;
+                it->state[1] = c[bk]->state;
                 it->state[3] = c[bk]->state;
 
                 for(int j=0;j<4;++j){
@@ -545,6 +691,9 @@ double local_energy_density(chain** c, double lambda, double beta){
     return lambda*stau/beta+(double)n/beta;
 }
 
+int qlm_block_data_id=0;
+int qlm_block_data_size=1000;
+double* qlm_block_data;
 void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda, int seed, char* fname){
     int xy = x*y;
     int i,j,n,size,flag,s0,s1;
@@ -558,6 +707,10 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
         sigma[i] = c[i]->state;
         if(i<xy) Ma+=c[i]->state;
         else Mb+=c[i]->state;
+    }
+
+    if(qlm_block_data==NULL){
+        qlm_block_data = (double*)malloc(sizeof(double)*qlm_block_data_size*20);
     }
 
     if(msize==0){
@@ -583,7 +736,7 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
             s0 = c[i]->node[flag*size+j].state[0];
             s1 = c[i]->node[flag*size+j].state[1];
             if(s0!=s1){
-                uint64_t key = c[i]->node[flag*size+j].key;
+                //uint64_t key = c[i]->node[flag*size+j].key;
                 mtau[n]  = c[i]->node[flag*size+j].tau;
                 msite[n] = (size_t)i;
                 //printf("%d %.3f %" PRIu64 " %d %d %d %.3f %d %d\n",n,mtau[n],key,i,s0,s1,m->beta,flag,size);
@@ -626,9 +779,33 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
     }
     energy = energy/m->nsite;
 
-    FILE* myfile = fopen(fname,"a");
-    fprintf(myfile,"%d %d %.10e %.10e %d %.10e\n",Ma,Mb,Ma2,Mb2,n,energy);
-    fclose(myfile);
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*0] = Ma2;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*1] = Mb2;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*2] = (double)n;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*3] = energy;
+
+    qlm_block_data_id++;
+
+    if(qlm_block_data_id==qlm_block_data_size){
+        int nobs=4;
+        double obs[nobs];
+        FILE* myfile = fopen(fname,"a");
+        fprintf(myfile,"%d %d ",Ma,Mb);
+        for(i=0;i<nobs;i++){
+            obs[i]=0;
+            for(j=0;j<qlm_block_data_size;j++){
+                obs[i] += qlm_block_data[j+qlm_block_data_size*i];
+            }
+            obs[i] = obs[i]/qlm_block_data_size;
+
+            fprintf(myfile,"%.16e ",obs[i]);
+        }
+
+        fprintf(myfile,"\n");
+        fclose(myfile);
+
+        qlm_block_data_id=0;
+    }
 
     free(sigma);
 }
@@ -667,6 +844,7 @@ int main(int argc, char** argv){
     int y;
     double lambda;
     double beta;
+    int distance;
     int ntherm;
     int nsweep;
     int seed;
@@ -677,6 +855,7 @@ int main(int argc, char** argv){
         y = 8;
         lambda = 1.0;
         beta = 10;
+        distance = 0;
         ntherm = 10000;
         nsweep = 1000;
         seed = 1;
@@ -686,16 +865,17 @@ int main(int argc, char** argv){
         y = atoi(argv[2]);
         lambda = atof(argv[3]);
         beta = atof(argv[4]);
-        ntherm = atoi(argv[5]);
-        nsweep = atoi(argv[6]);
-        seed = atoi(argv[7]);
+        distance = atoi(argv[5]);
+        ntherm = atoi(argv[6]);
+        nsweep = atoi(argv[7]);
+        seed = atoi(argv[8]);
     }
 
-    if(argc<9){
+    if(argc<10){
         sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_seed_%d_.txt",x,y,beta,lambda,seed);
     }
      else{
-         strcpy(fname,argv[8]);
+         strcpy(fname,argv[9]);
      }
 
     model* m = generate_QLM_2d_triangular(x,y,beta,lambda);
@@ -703,21 +883,37 @@ int main(int argc, char** argv){
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_mt19937);
     gsl_rng_set(rng,seed);
 
-    chain* c[m->nsite];
-    double dis = gsl_rng_uniform_pos(rng);
-    for(int i=0;i<x*y;++i){
-       c[i] = chain_alloc(2000);
-       if(dis<0.5) c[i]->state = 1;
-       else c[i]->state = -1;
-    }
-    dis = gsl_rng_uniform_pos(rng);
-    for(int i=x*y;i<2*x*y;++i){
-       c[i] = chain_alloc(2000);
-       if(dis<0.5) c[i]->state = 1;
-       else c[i]->state = -1;
-    }
+    //state for generate initial state or charge counting
+    int* state = (int*)malloc(sizeof(int)*x*y*2);
 
-    table* t = table_alloc(10);
+    chain* c[m->nsite];
+
+    if(distance>0){
+        initial_state_with_charge(state,x,y,distance);
+
+        for(int i=0;i<2*x*y;++i){
+            c[i] = chain_alloc(2000);
+            c[i]->state = state[i];
+        }
+    }
+    else {
+        double dis;
+        dis = gsl_rng_uniform_pos(rng);
+        for(int i=0;i<x*y;++i){
+            c[i] = chain_alloc(2000);
+            if(dis<0.5) c[i]->state = 1;
+            else c[i]->state = -1;
+        }
+        dis = gsl_rng_uniform_pos(rng);
+        for(int i=x*y;i<2*x*y;++i){
+            c[i] = chain_alloc(2000);
+            if(dis<0.5) c[i]->state = 1;
+            else c[i]->state = -1;
+        }
+    }
+    
+
+    table* t = table_alloc(16);
 
     int quick_thermalize=0;
     int nq = 5;
@@ -736,7 +932,6 @@ int main(int argc, char** argv){
         }
     }
 
-    int* state = (int*)malloc(sizeof(int)*x*y*2);
     for(int i=0;i<ntherm;++i){
         update_A(c,t,m,x,y,rng);
         update_B(c,t,m,x,y,rng);
@@ -752,6 +947,11 @@ int main(int argc, char** argv){
 
                 if(s0!=s1){
                     printf("Vaiolate the periodic boundary condition!\n");
+                    printf("# of node = %d\n",n);
+                    printf("site=%d node_id=%d (s0,s1)=(%d,%d)\n",j,k,s0,s1);
+                    chain_print_state(c[j]);
+                    table_print_state(t);
+                    printf("---------------------------------------\n");
                     exit(1);
                 }
 
@@ -767,8 +967,9 @@ int main(int argc, char** argv){
         for(int site_id=0;site_id<m->nsite;++site_id){
             state[site_id] = c[site_id]->state;
         }
-        counting_charge(state,x,y);
-        qlm_check_ref_conf(t);
+        //print_charge(state,x,y);
+        //counting_charge(state,x,y,distance);
+        //qlm_check_ref_conf(t);
     }
     free(state);
 
