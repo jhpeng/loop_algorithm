@@ -138,7 +138,7 @@ void print_charge(int* state, int x, int y){
 
         if(charge>0) printf("+ ");
         else if(charge<0) printf("- ");
-        else {
+        else if(0){
             if(yflux==0){
                 if(xflux>0) printf("> ");
                 else if(xflux<0) printf("< ");
@@ -152,6 +152,7 @@ void print_charge(int* state, int x, int y){
             else if(xflux*yflux>0) printf("%c ",(char)32);
             else if(xflux*yflux<0) printf("%c ",(char)32);
         }
+        else printf("0 ");
 
         if(block_id%x==x-1) printf("\n");
     }
@@ -173,11 +174,11 @@ void initial_state_with_charge(int* state, int x, int y, int distance){
         }
     }
 
-    iy = y/2;
+    iy = y/2-1;
     for(ix=(x-distance)/2;ix<(x+distance)/2;ix++){
         ak = ((iy+1)%y)*x+(ix+1)%x;
 
-        bj = iy*x+(ix+1)%x         + x*y;
+        bj = iy*x+(ix+1)%x + x*y;
 
         state[ak] = -1;
         state[bj] = -1;
@@ -736,10 +737,8 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
             s0 = c[i]->node[flag*size+j].state[0];
             s1 = c[i]->node[flag*size+j].state[1];
             if(s0!=s1){
-                //uint64_t key = c[i]->node[flag*size+j].key;
                 mtau[n]  = c[i]->node[flag*size+j].tau;
-                msite[n] = (size_t)i;
-                //printf("%d %.3f %" PRIu64 " %d %d %d %.3f %d %d\n",n,mtau[n],key,i,s0,s1,m->beta,flag,size);
+                msite[n] = i;
                 ++n;
             }
         }
@@ -749,23 +748,43 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
 
     double Ma2=0;
     double Mb2=0;
-#if 0
+
+#if 1
+    int na=0;
+    int nb=0;
+    double stau_a=0.0;
+    double stau_b=0.0;
     for(j=0;j<n;++j){
         i = msort[j];
-        if(msite[i]<xy)
+
+        if(msite[i]<xy){
+            Ma2 += (double)Ma*(double)Ma*(mtau[i]-stau_a);
+            stau_a = mtau[i];
             Ma += -sigma[msite[i]]*2;
-        else
+            na++;
+        }
+        else{
+            Mb2 += (double)Mb*(double)Mb*(mtau[i]-stau_b);
+            stau_b = mtau[i];
             Mb += -sigma[msite[i]]*2;
+            nb++;
+        }
 
         sigma[msite[i]] *= -1;
 
-        Ma2 += (double)Ma*(double)Ma;
-        Mb2 += (double)Mb*(double)Mb;
-    }
-#endif 
 
+        //printf("%d %d %ld %.3f %d %d \n",j,i,msite[i],mtau[i],Ma,Mb);
+
+    }
+    Ma2 += (double)Ma*(double)Ma*(m->beta-stau_a);
+    Mb2 += (double)Mb*(double)Mb*(m->beta-stau_a);
+
+    Ma2 = Ma2/(m->beta);
+    Mb2 = Mb2/(m->beta);
+#else 
     Ma2 = (double)Ma*(double)Ma;
     Mb2 = (double)Mb*(double)Mb;
+#endif
 
     chain *c_temp[4];
     double energy=0;
@@ -781,13 +800,15 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
 
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*0] = Ma2;
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*1] = Mb2;
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*2] = (double)n;
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*3] = energy;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*2] = (double)Ma*(double)Ma;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*3] = (double)Mb*(double)Mb;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*4] = (double)n;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*5] = energy;
 
     qlm_block_data_id++;
 
     if(qlm_block_data_id==qlm_block_data_size){
-        int nobs=4;
+        int nobs=6;
         double obs[nobs];
         FILE* myfile = fopen(fname,"a");
         fprintf(myfile,"%d %d ",Ma,Mb);
@@ -841,6 +862,8 @@ void qlm_energy_map(chain** c, model* m, int x, int y, double lambda, int nsweep
         }
         fprintf(myfile,"\n");
         fclose(myfile);
+
+        free(energy_map_data);
     }
 }
 
