@@ -158,7 +158,7 @@ void print_charge(int* state, int x, int y){
     }
 }
 
-void initial_state_with_charge(int* state, int x, int y, int distance){
+void initial_state_with_charge1(int* state, int x, int y, int distance){
     int ak,bj;
     int ix,iy;
 
@@ -183,6 +183,37 @@ void initial_state_with_charge(int* state, int x, int y, int distance){
         state[ak] = -1;
         state[bj] = -1;
     }
+
+    counting_charge(state,x,y,distance);
+}
+
+void initial_state_with_charge2(int* state, int x, int y, int distance){
+    int ak,bk;
+    int ix,iy;
+
+    if(distance > x/2){
+        printf("initial_state_with_charge : the distance can not larger than x/2!\n");
+        exit(1);
+    }
+
+    for(iy=0;iy<y;iy++){
+        for(ix=0;ix<x;ix++){
+            state[iy*x+ix]     = 1;
+            state[iy*x+ix+x*y] = -1;
+        }
+    }
+
+    iy = y/2-1;
+    for(ix=(x-distance)/2;ix<(x+distance)/2+1;ix++){
+        ak = ((iy+1)%y)*x+(ix+1)%x;
+
+        bk = ((iy+1)%y)*x+(ix+1)%x + x*y;
+
+        state[ak] *= -1;
+        state[bk] *= -1;
+    }
+
+    state[ak] *= -1;
 
     counting_charge(state,x,y,distance);
 }
@@ -950,7 +981,7 @@ int main(int argc, char** argv){
     chain* c[m->nsite];
 
     if(distance>0){
-        initial_state_with_charge(state,x,y,distance);
+        initial_state_with_charge2(state,x,y,distance);
 
         for(int i=0;i<2*x*y;++i){
             c[i] = chain_alloc(2000);
