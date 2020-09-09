@@ -929,8 +929,8 @@ int main(int argc, char** argv){
         seed = atoi(argv[8]);
     }
 
-    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.1f_lambda_%.2f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
-    sprintf(ename,"map/qlm_energy_map_x_%d_y_%d_beta_%.1f_lambda_%.2f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    sprintf(ename,"map/qlm_energy_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
 
      if(argc>9){
          strcpy(fname,argv[9]);
