@@ -981,7 +981,7 @@ int main(int argc, char** argv){
     chain* c[m->nsite];
 
     if(distance>0){
-        initial_state_with_charge2(state,x,y,distance);
+        initial_state_with_charge1(state,x,y,distance);
 
         for(int i=0;i<2*x*y;++i){
             c[i] = chain_alloc(2000);
