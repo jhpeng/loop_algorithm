@@ -957,18 +957,19 @@ int main(int argc, char** argv){
         distance = atoi(argv[5]);
         ntherm = atoi(argv[6]);
         nsweep = atoi(argv[7]);
-        seed = atoi(argv[8]);
+        qlm_block_data_size = atoi(argv[8]);
+        seed = atoi(argv[9]);
     }
 
     sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
     sprintf(ename,"map/qlm_energy_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
 
-     if(argc>9){
-         strcpy(fname,argv[9]);
-     }
-     else if(argc>10){
-         strcpy(ename,argv[10]);
-     }
+     //if(argc>10){
+     //    strcpy(fname,argv[10]);
+     //}
+     //else if(argc>11){
+     //    strcpy(ename,argv[11]);
+     //}
 
     model* m = generate_QLM_2d_triangular(x,y,beta,lambda);
 
