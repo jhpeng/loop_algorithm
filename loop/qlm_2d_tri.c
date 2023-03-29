@@ -938,6 +938,7 @@ int main(int argc, char** argv){
     int seed;
     char fname[128];
     char ename[128];
+    char cname[128];
 
     if(argc==1){
         x = 8;
@@ -946,7 +947,7 @@ int main(int argc, char** argv){
         beta = 10;
         distance = 0;
         ntherm = 10000;
-        nsweep = 1000;
+        nsweep = 4000;
         seed = 1;
     }
     else{
@@ -963,6 +964,7 @@ int main(int argc, char** argv){
 
     sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
     sprintf(ename,"map/qlm_energy_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    sprintf(cname,"map/config_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
 
      //if(argc>10){
      //    strcpy(fname,argv[10]);
@@ -1083,6 +1085,17 @@ int main(int argc, char** argv){
 
         qlm_measurement(c,t,m,x,y,lambda,fname);
         qlm_energy_map(c,m,x,y,lambda,nsweep,ename);
+
+        if((i+1)%2000==0) {
+            FILE* config_file = fopen(cname,"a");
+
+            for(int i_site=0;i_site<(m->nsite);i_site++) {
+                fprintf(config_file,"%d ",c[i_site]->state);
+            }
+            fprintf(config_file,"\n");
+
+            fclose(config_file);
+        }
     }
 
     return 0;
