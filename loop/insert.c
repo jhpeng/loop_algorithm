@@ -3,6 +3,20 @@
 static double* insert_tau=NULL;
 static int insert_size=0;
 
+/**
+ * @brief Generates a uniform distribution of size with a given weight and beta.
+ *
+ * This function generates a uniform distribution and stores the values in the
+ * provided double array tau. The size of the distribution is determined by the
+ * input parameter size.
+ *
+ * @param tau Pointer to the array where the uniform distribution will be stored.
+ * @param n Pointer to an integer which will store the size of the distribution.
+ * @param size The size of the distribution.
+ * @param w The weight of the distribution.
+ * @param beta The beta value used in the distribution.
+ * @param rng Pointer to the GSL random number generator.
+ */
 static void generate_uniform_dist(double* tau, int *n, int size, double w, double beta, gsl_rng* rng){
     double dis = gsl_rng_uniform_pos(rng);
     double temp=-log(dis)/w;
