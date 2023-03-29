@@ -9,6 +9,15 @@ int msize=0;
 #define gauss_law
 #endif
 
+/**
+ * @brief Calculate the charge for a given highvar configuration.
+ * 
+ * This function calculates the charge for a given highvar configuration h by comparing
+ * the values of h at different indices and updating the charge accordingly.
+ *
+ * @param h Pointer to an integer array representing the highvar configuration.
+ * @return Calculated charge for the given highvar configuration.
+ */
 static int highvar2charge(int* h){
     int charge=0;
 
@@ -28,6 +37,15 @@ static int highvar2charge(int* h){
     return charge;
 }
 
+/**
+ * @brief Calculate the X flux for a given highvar configuration.
+ *
+ * This function calculates the X flux for a given highvar configuration h by comparing
+ * the values of h at different indices and updating the xflux accordingly.
+ *
+ * @param h Pointer to an integer array representing the highvar configuration.
+ * @return Calculated X flux for the given highvar configuration.
+ */
 static double highvar2Xflux(int* h){
     double xflux=0.0;
     double factor=0.70710678118;
@@ -44,6 +62,15 @@ static double highvar2Xflux(int* h){
     return xflux;
 }
 
+/**
+ * @brief Calculate the Y flux for a given highvar configuration.
+ *
+ * This function calculates the Y flux for a given highvar configuration h by comparing
+ * the values of h at different indices and updating the yflux accordingly.
+ *
+ * @param h Pointer to an integer array representing the highvar configuration.
+ * @return Calculated Y flux for the given highvar configuration.
+ */
 static double highvar2Yflux(int* h){
     double yflux=0.0;
     double factor=0.70710678118;
@@ -60,6 +87,17 @@ static double highvar2Yflux(int* h){
     return yflux;
 }
 
+/**
+ * @brief Count the charge in a given state and print the result.
+ * 
+ * This function counts the charge in a given state for each block by calculating
+ * the highvar configuration and calling highvar2charge function. The result is printed.
+ *
+ * @param state Pointer to an integer array representing the state.
+ * @param x Width of the lattice.
+ * @param y Height of the lattice.
+ * @param distance Distance between charges.
+ */
 void counting_charge(int* state, int x, int y, int distance){
     int ai,aj,ak,bi,bj,bk;
     int block_id;
@@ -102,6 +140,16 @@ void counting_charge(int* state, int x, int y, int distance){
     }
 }
 
+/**
+ * @brief Print the charge distribution for a given state.
+ *
+ * This function prints the charge distribution for a given state by calculating
+ * the highvar configuration and calling highvar2charge, highvar2Xflux, and highvar2Yflux functions.
+ *
+ * @param state Pointer to an integer array representing the state.
+ * @param x Width of the lattice.
+ * @param y Height of the lattice.
+ */
 void print_charge(int* state, int x, int y){
     int ai,aj,ak,bi,bj,bk;
     int block_id;
@@ -158,6 +206,17 @@ void print_charge(int* state, int x, int y){
     }
 }
 
+/**
+ * @brief Initialize a state with charge 1.
+ *
+ * This function initializes a state with charge 1 by setting the state array values based on
+ * the given lattice dimensions and distance between charges.
+ *
+ * @param state Pointer to an integer array representing the state.
+ * @param x Width of the lattice.
+ * @param y Height of the lattice.
+ * @param distance Distance between charges.
+ */
 void initial_state_with_charge1(int* state, int x, int y, int distance){
     int ak,bj;
     int ix,iy;
@@ -187,6 +246,17 @@ void initial_state_with_charge1(int* state, int x, int y, int distance){
     counting_charge(state,x,y,distance);
 }
 
+/**
+ * @brief Initialize a state with charge 2.
+ *
+ * This function initializes a state with charge 2 by setting the state array values based on
+ * the given lattice dimensions and distance between charges.
+ *
+ * @param state Pointer to an integer array representing the state.
+ * @param x Width of the lattice.
+ * @param y Height of the lattice.
+ * @param distance Distance between charges.
+ */
 void initial_state_with_charge2(int* state, int x, int y, int distance){
     int ak,bk;
     int ix,iy;
@@ -218,6 +288,19 @@ void initial_state_with_charge2(int* state, int x, int y, int distance){
     counting_charge(state,x,y,distance);
 }
 
+/**
+ * @brief Apply Gauss's law on sub-lattice A.
+ *
+ * This function applys the Gauss's law on sub-lattice A for a given model and lattice
+ * configuration. It modifies the chain and table structures by inserting new items
+ * and updating their properties.
+ *
+ * @param c  A 2D array of pointers to chain structures representing the lattice configuration.
+ * @param t  A pointer to a table structure storing lattice item information.
+ * @param m  A pointer to a model structure containing the lattice model parameters.
+ * @param x  The number of columns in the lattice.
+ * @param y  The number of rows in the lattice.
+ */
 static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
     int ai,aj,ak,bi,bj,bk;
     int block_id;
@@ -329,6 +412,19 @@ static void gauss_law_A(chain** c, table* t, model* m, int x, int y){
     }
 }
 
+/**
+ * @brief Apply Gauss's law on sub-lattice B.
+ *
+ * This function applys the Gauss's law on sub-lattice B for a given model and lattice
+ * configuration. It modifies the chain and table structures by inserting new items
+ * and updating their properties.
+ *
+ * @param c  A 2D array of pointers to chain structures representing the lattice configuration.
+ * @param t  A pointer to a table structure storing lattice item information.
+ * @param m  A pointer to a model structure containing the lattice model parameters.
+ * @param x  The number of columns in the lattice.
+ * @param y  The number of rows in the lattice.
+ */
 static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
     int ai,aj,ak,bi,bj,bk;
     int block_id;
@@ -440,6 +536,20 @@ static void gauss_law_B(chain** c, table* t, model* m, int x, int y){
     }
 }
 
+/**
+ * @brief Updates the sub-lattice A of the quantum loop model (QLM).
+ *
+ * The function updates the sub-lattice A of the QLM on a 2D triangular lattice based on
+ * given model parameters and lattice configuration. It updates chain structures,
+ * inserts triangular cut graphs, and performs cluster updates.
+ *
+ * @param c A 2D array of pointers to chain structures representing the lattice configuration.
+ * @param t A pointer to a table structure storing lattice item information.
+ * @param m A pointer to a model structure containing the lattice model parameters.
+ * @param x The number of columns in the lattice.
+ * @param y The number of rows in the lattice.
+ * @param rng A pointer to a GSL random number generator.
+ */
 static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     int i,j,k,l,bond_id;
     double beta = m->beta;
@@ -501,6 +611,20 @@ static void update_A(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     }
 }
 
+/**
+ * @brief Updates the sub-lattice B of the quantum loop model (QLM).
+ *
+ * The function updates the sub-lattice B of the QLM on a 2D triangular lattice based on
+ * given model parameters and lattice configuration. It updates chain structures,
+ * inserts triangular cut graphs, and performs cluster updates.
+ *
+ * @param c A 2D array of pointers to chain structures representing the lattice configuration.
+ * @param t A pointer to a table structure storing lattice item information.
+ * @param m A pointer to a model structure containing the lattice model parameters.
+ * @param x The number of columns in the lattice.
+ * @param y The number of rows in the lattice.
+ * @param rng A pointer to a GSL random number generator.
+ */
 static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     int i,j,k,l,bond_id;
     double beta = m->beta;
@@ -563,6 +687,18 @@ static void update_B(chain** c, table* t, model* m, int x, int y, gsl_rng* rng){
     }
 }
 
+/**
+ * @brief Generates a 2D triangular quantum loop model (QLM) with given parameters.
+ *
+ * This function creates a 2D triangular QLM with the specified dimensions, beta, and lambda.
+ * It initializes the model structure, including bond types, bond-to-site mapping, and weights.
+ *
+ * @param x The number of columns in the lattice.
+ * @param y The number of rows in the lattice.
+ * @param beta The inverse temperature parameter for the model.
+ * @param lambda The loop weight parameter for the model.
+ * @return A pointer to the generated model structure.
+ */
 model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
     int nsite = 2*x*y;
     int nbond = 4*x*y;
@@ -651,6 +787,18 @@ model* generate_QLM_2d_triangular(int x, int y, double beta, double lambda){
     return m;
 }
 
+/**
+ * @brief Compute the local energy density for a given site.
+ *
+ * This function calculates the local energy density for a given site
+ * based on the input data provided. It is used as a helper function
+ * in other calculations.
+ *
+ * @param c Pointer to an array of pointers to chains, size should be 4.
+ * @param lambda The coupling constant used in the calculations.
+ * @param beta The inverse temperature used in the calculations.
+ * @return The computed local energy density for the given site.
+ */
 double local_energy_density(chain** c, double lambda, double beta){
     int state[3];
     int i,j,n,site,ref;
@@ -723,6 +871,21 @@ double local_energy_density(chain** c, double lambda, double beta){
     return lambda*stau/beta+(double)n/beta;
 }
 
+/**
+ * @brief Perform qlm measurements on the system.
+ *
+ * This function computes various observables for a given system,
+ * stores the results in a block of data, and writes the results to
+ * a file once the block is full.
+ *
+ * @param c Pointer to an array of pointers to chains.
+ * @param t Pointer to a table.
+ * @param m Pointer to a model.
+ * @param x The x dimension of the lattice.
+ * @param y The y dimension of the lattice.
+ * @param lambda The coupling constant used in the calculations.
+ * @param fname The filename to which the results should be written.
+ */
 int qlm_block_data_id=0;
 int qlm_block_data_size=1000;
 double* qlm_block_data;
@@ -862,6 +1025,22 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
     free(sigma);
 }
 
+/**
+ * @brief Calculate the energy map for the lattice.
+ *
+ * This function calculates the energy map of the lattice by calling
+ * local_energy_density for each site and accumulating the results.
+ * After a specified number of sweeps, the energy map is written to
+ * a file and memory is released.
+ *
+ * @param c Pointer to an array of pointers to chains.
+ * @param m Pointer to a model.
+ * @param x The x dimension of the lattice.
+ * @param y The y dimension of the lattice.
+ * @param lambda The coupling constant used in the calculations.
+ * @param nsweep The number of sweeps to be performed before writing to file.
+ * @param fname The filename to which the results should be written.
+ */
 int energy_map_id;
 double* energy_map_data;
 void qlm_energy_map(chain** c, model* m, int x, int y, double lambda, int nsweep, char* fname){
@@ -898,6 +1077,15 @@ void qlm_energy_map(chain** c, model* m, int x, int y, double lambda, int nsweep
     }
 }
 
+/**
+ * @brief Check if the reference configurations are valid.
+ *
+ * This function checks if the reference configurations in a given table
+ * satisfy the required conditions. If not, it prints an error message.
+ * It is used for debugging purposes.
+ *
+ * @param t Pointer to a table.
+ */
 void qlm_check_ref_conf(table* t){
     int size = t->size;
     int n = t->n;
