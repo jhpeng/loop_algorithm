@@ -1122,7 +1122,7 @@ void qlm_check_ref_conf(table* t){
  * @param argv Array of input arguments as strings.
  *        - argv[1]: Lattice size x.
  *        - argv[2]: Lattice size y.
- *        - argv[3]: Coupling constant lambda.
+ *        - argv[3]: Coupling constant -lambda.
  *        - argv[4]: Inverse temperature beta.
  *        - argv[5]: Distance for the initial state.
  *        - argv[6]: Number of thermalization steps (ntherm).
