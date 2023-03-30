@@ -1115,6 +1115,30 @@ void qlm_check_ref_conf(table* t){
         printf("missing %d\n",n-count);
 }
 
+/**
+ * @brief Main function for simulating a quantum lattice model (QLM) on a 2D triangular lattice.
+ *
+ * @param argc Number of input arguments.
+ * @param argv Array of input arguments as strings.
+ *        - argv[1]: Lattice size x.
+ *        - argv[2]: Lattice size y.
+ *        - argv[3]: Coupling constant lambda.
+ *        - argv[4]: Inverse temperature beta.
+ *        - argv[5]: Distance for the initial state.
+ *        - argv[6]: Number of thermalization steps (ntherm).
+ *        - argv[7]: Number of sweeps for measurement (nsweep).
+ *        - argv[8]: QLM block data size (optional, not used in the current code).
+ *        - argv[9]: Seed for the random number generator.
+ *        - argv[10]: Output data file name (optional, not used in the current code).
+ *        - argv[11]: Output energy map file name (optional, not used in the current code).
+ * @return 0 on successful completion of the simulation.
+ *
+ * The function simulates a QLM on a 2D triangular lattice, taking input arguments for lattice size,
+ * coupling constants (lambda and beta), distance, number of thermalization steps (ntherm),
+ * number of sweeps (nsweep), and random number generator seed. It generates a lattice model,
+ * initializes a random state, and updates the state through a series of thermalization and
+ * measurement steps.
+ */
 int main(int argc, char** argv){
     int x;
     int y;
