@@ -994,8 +994,8 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
 
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*0] = Ma2;
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*1] = Mb2;
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*2] = absf(Ma);
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*3] = absf(Mb);
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*2] = fabs(Ma);
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*3] = fabs(Mb);
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*4] = (double)Ma*(double)Ma;
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*5] = (double)Mb*(double)Mb;
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*6] = (double)Ma*(double)Ma*(double)Ma*(double)Ma;
