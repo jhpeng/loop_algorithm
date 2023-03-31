@@ -994,15 +994,19 @@ void qlm_measurement(chain** c, table* t, model* m, int x, int y, double lambda,
 
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*0] = Ma2;
     qlm_block_data[qlm_block_data_id+qlm_block_data_size*1] = Mb2;
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*2] = (double)Ma*(double)Ma;
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*3] = (double)Mb*(double)Mb;
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*4] = (double)n;
-    qlm_block_data[qlm_block_data_id+qlm_block_data_size*5] = energy;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*2] = absf(Ma);
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*3] = absf(Mb);
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*4] = (double)Ma*(double)Ma;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*5] = (double)Mb*(double)Mb;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*6] = (double)Ma*(double)Ma*(double)Ma*(double)Ma;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*7] = (double)Mb*(double)Mb*(double)Mb*(double)Mb;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*8] = (double)n;
+    qlm_block_data[qlm_block_data_id+qlm_block_data_size*9] = energy;
 
     qlm_block_data_id++;
 
     if(qlm_block_data_id==qlm_block_data_size){
-        int nobs=6;
+        int nobs=10;
         double obs[nobs];
         FILE* myfile = fopen(fname,"a");
         fprintf(myfile,"%d %d ",Ma,Mb);
@@ -1174,7 +1178,8 @@ int main(int argc, char** argv){
         seed = atoi(argv[9]);
     }
 
-    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    //sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    sprintf(fname,"data.txt");
     sprintf(ename,"map/qlm_energy_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
     sprintf(cname,"map/config_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
 
