@@ -1296,7 +1296,7 @@ int main(int argc, char** argv){
         }
 
         qlm_measurement(c,t,m,x,y,lambda,fname);
-        qlm_energy_map(c,m,x,y,lambda,nsweep,ename);
+/*        qlm_energy_map(c,m,x,y,lambda,nsweep,ename);
 
         if((i+1)%2000==0) {
             FILE* config_file = fopen(cname,"a");
@@ -1308,6 +1308,7 @@ int main(int argc, char** argv){
 
             fclose(config_file);
         }
+*/
     }
 
     return 0;
