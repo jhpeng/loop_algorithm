@@ -1153,6 +1153,7 @@ int main(int argc, char** argv){
     int nsweep;
     int seed;
     char fname[128];
+    char hname[128];
     char ename[128];
     char cname[128];
 
@@ -1178,8 +1179,9 @@ int main(int argc, char** argv){
         seed = atoi(argv[9]);
     }
 
-    //sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
-    sprintf(fname,"data.txt");
+    sprintf(fname,"data/qlm_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    sprintf(hname,"data/qlm_energy_histogram_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
+    //sprintf(fname,"data.txt");
     sprintf(ename,"map/qlm_energy_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
     sprintf(cname,"map/config_map_x_%d_y_%d_beta_%.2f_lambda_%.4f_cdist_%d_seed_%d_.txt",x,y,beta,lambda,distance,seed);
 
@@ -1301,9 +1303,10 @@ int main(int argc, char** argv){
         }
 
         qlm_measurement(c,t,m,x,y,lambda,fname);
-/*        qlm_energy_map(c,m,x,y,lambda,nsweep,ename);
+        qlm_energy_map(c,m,x,y,lambda,nsweep,ename);
 
         if((i+1)%2000==0) {
+            // record the sanp shoot of configuration
             FILE* config_file = fopen(cname,"a");
 
             for(int i_site=0;i_site<(m->nsite);i_site++) {
@@ -1312,8 +1315,27 @@ int main(int argc, char** argv){
             fprintf(config_file,"\n");
 
             fclose(config_file);
+
+            // record the the current energy density
+            FILE* energy_hist_file = fopen(hname,"a");
+
+            chain *c_temp[4];
+            double energy=0;
+            for(i=0;i<m->nsite;++i){
+                c_temp[0] = c[m->bond2site[i*NSPIN_MAX+0]];
+                c_temp[1] = c[m->bond2site[i*NSPIN_MAX+1]];
+                c_temp[2] = c[m->bond2site[i*NSPIN_MAX+2]];
+                c_temp[3] = c[m->bond2site[i*NSPIN_MAX+3]];
+
+                energy+=local_energy_density(c_temp,lambda, m->beta);
+            }
+            energy = energy/m->nsite;
+
+            fprintf(energy_hist_file,"%.16e \n", energy);
+            fclose(energy_hist_file);
+
         }
-*/
+
     }
 
     return 0;
